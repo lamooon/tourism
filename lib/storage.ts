@@ -5,7 +5,7 @@ import type {
   DateRange,
   TripSelections,
   UploadMeta,
-} from "@/types";
+} from "@/types/types";
 
 const ROOT = "tourism";
 

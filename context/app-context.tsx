@@ -9,7 +9,7 @@ import type {
   TripSelections,
   UploadMeta,
   VisaTypeLabel,
-} from "@/types";
+} from "@/types/types";
 export type ChecklistState = Record<string, boolean>;
 import {
   DEFAULT_NATIONALITY,
@@ -17,7 +17,7 @@ import {
   MOCK_MAPPING,
   generateChecklist,
   visaLabelFor,
-} from "@/mocks";
+} from "@/lib/mocks";
 
 export interface AppState {
   applications: ApplicationMeta[];
@@ -70,7 +70,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   function createApplication(): string {
     const id = crypto.randomUUID();
     const trip: TripSelections = {
-      nationality: DEFAULT_NATIONALITY,
+      nationalityCode: "HKG",
+      destinationCountryAlpha2: null,
       destination: null,
       purpose: null,
       dates: { from: null, to: null },
@@ -134,7 +135,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   function updateTrip(next: Partial<TripSelections>) {
     if (!state.currentAppId) return;
     const current = state.trip ?? {
-      nationality: DEFAULT_NATIONALITY,
+      nationalityCode: "HKG",
+      destinationCountryAlpha2: null,
       destination: null,
       purpose: null,
       dates: { from: null, to: null },

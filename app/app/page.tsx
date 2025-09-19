@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useApp } from "@/context/app-context";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -57,6 +57,8 @@ import {
   CalendarIcon,
   ClipboardCopy,
 } from "lucide-react";
+import { CountryCombobox } from "@/components/ui/country-combobox";
+import { visaAreaForDestination } from "@/lib/countries";
 
 function StickyFooter({
   canPrev,
@@ -65,6 +67,7 @@ function StickyFooter({
   onNext,
   onLaunch,
   disabledReason,
+  showLaunch,
 }: {
   canPrev: boolean;
   canNext: boolean;
@@ -72,6 +75,7 @@ function StickyFooter({
   onNext: () => void;
   onLaunch: () => void;
   disabledReason?: string;
+  showLaunch: boolean;
 }) {
   return (
     <div className="sticky bottom-0 left-0 right-0 border-t bg-background/80 backdrop-blur p-4 flex items-center justify-between">
@@ -82,23 +86,27 @@ function StickyFooter({
         <Button variant="outline" disabled={!canPrev} onClick={onPrev}>
           Prev
         </Button>
-        <Button variant="outline" disabled={!canNext} onClick={onNext}>
-          Next
-        </Button>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              onClick={onLaunch}
-              className="gap-2"
-              disabled={!!disabledReason}
-            >
-              <Rocket className="size-4" /> Launch Agent
-            </Button>
-          </TooltipTrigger>
-          {disabledReason ? (
-            <TooltipContent>{disabledReason}</TooltipContent>
-          ) : null}
-        </Tooltip>
+        {!showLaunch && (
+          <Button variant="outline" disabled={!canNext} onClick={onNext}>
+            Next
+          </Button>
+        )}
+        {showLaunch && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={onLaunch}
+                className="gap-2"
+                disabled={!!disabledReason}
+              >
+                <Rocket className="size-4" /> Launch Agent
+              </Button>
+            </TooltipTrigger>
+            {disabledReason ? (
+              <TooltipContent>{disabledReason}</TooltipContent>
+            ) : null}
+          </Tooltip>
+        )}
       </div>
     </div>
   );
@@ -121,7 +129,8 @@ function TripSetup() {
   }
 
   const valid = Boolean(
-    trip?.nationality &&
+    trip?.nationalityCode &&
+      trip?.destinationCountryAlpha2 &&
       trip?.destination &&
       trip?.purpose &&
       trip?.dates.from &&
@@ -132,31 +141,30 @@ function TripSetup() {
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Nationality</label>
-          <Input
-            value={trip?.nationality ?? ""}
-            onChange={(e) => updateTrip({ nationality: e.target.value })}
-            aria-describedby="nat-help"
+          <CountryCombobox
+            label="Nationality"
+            placeholder="Select nationality"
+            value={trip?.nationalityCode ?? null}
+            valueKind="alpha3"
+            onChange={(alpha3) => updateTrip({ nationalityCode: alpha3 })}
           />
-          <p id="nat-help" className="text-xs text-muted-foreground">
-            Defaulted to Hong Kong SAR.
-          </p>
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-medium">Destination</label>
-          <Select
-            value={trip?.destination ?? undefined}
-            onValueChange={(v) => setDestination(v as any)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="US">US</SelectItem>
-              <SelectItem value="Schengen">Schengen</SelectItem>
-              <SelectItem value="UK">UK</SelectItem>
-            </SelectContent>
-          </Select>
+          <CountryCombobox
+            label="Destination"
+            placeholder="Select destination country"
+            value={trip?.destinationCountryAlpha2 ?? null}
+            valueKind="alpha2"
+            onChange={(alpha2) => {
+              setIsCalculating(true);
+              const area = visaAreaForDestination(alpha2);
+              updateTrip({
+                destinationCountryAlpha2: alpha2,
+                destination: area,
+              });
+              setTimeout(() => setIsCalculating(false), 600);
+            }}
+          />
         </div>
         <div className="space-y-2">
           <label className="text-sm font-medium">Purpose</label>
@@ -164,7 +172,7 @@ function TripSetup() {
             value={trip?.purpose ?? undefined}
             onValueChange={(v) => setPurpose(v as any)}
           >
-            <SelectTrigger>
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="Select" />
             </SelectTrigger>
             <SelectContent>
@@ -595,13 +603,28 @@ function LaunchAgent() {
 }
 
 function WizardInner() {
-  const { state, loadApplication } = useApp();
+  const { state, loadApplication, createApplication } = useApp();
   const sp = useSearchParams();
+  const router = useRouter();
   const appId = sp.get("appId");
   const [step, setStep] = React.useState<1 | 2 | 3 | 4>(1);
 
   React.useEffect(() => {
-    if (appId) loadApplication(appId);
+    const isNew = sp.get("new") === "1";
+    if (isNew) {
+      const id = createApplication();
+      router.replace(`/app?appId=${id}`);
+      return;
+    }
+    if (appId) {
+      loadApplication(appId);
+      return;
+    }
+    if (!state.currentAppId) {
+      const id = createApplication();
+      router.replace(`/app?appId=${id}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appId]);
 
   const requirements: string[] = [];
@@ -661,6 +684,7 @@ function WizardInner() {
         onNext={() => setStep((s) => (s < 4 ? ((s + 1) as any) : s))}
         onLaunch={() => setStep(4)}
         disabledReason={requirements[0]}
+        showLaunch={step === 4}
       />
     </div>
   );
