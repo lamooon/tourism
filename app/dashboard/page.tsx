@@ -21,17 +21,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { MoreHorizontal, Plus, Trash2, Copy, Play, Eye } from "lucide-react";
+import { Plus, Trash2, Copy, Eye } from "lucide-react";
 
 function DashboardInner() {
   const router = useRouter();
-  const {
-    state,
-    createApplication,
-    deleteApplication,
-    duplicateApplication,
-    loadApplication,
-  } = useApp();
+  const { state, deleteApplication, duplicateApplication } = useApp();
 
   function handleNew() {
     router.push(`/app?new=1`);

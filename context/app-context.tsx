@@ -4,15 +4,13 @@ import * as React from "react";
 import type {
   ApplicationMeta,
   ChecklistItem,
-  Destination,
+  ExtractionResult,
   MappingItem,
   TripSelections,
   UploadMeta,
-  VisaTypeLabel,
 } from "@/types/types";
 export type ChecklistState = Record<string, boolean>;
 import {
-  DEFAULT_NATIONALITY,
   MOCK_EXTRACTION,
   MOCK_MAPPING,
   generateChecklist,
@@ -26,7 +24,7 @@ export interface AppState {
   checklist: ChecklistItem[];
   checklistState: ChecklistState;
   uploads: UploadMeta[];
-  extraction: typeof MOCK_EXTRACTION;
+  extraction: ExtractionResult;
   mapping: MappingItem[];
   mappingOverrides: Record<string, string | number>;
 }
@@ -202,6 +200,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setUploads,
       updateMappingValue,
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [state]
   );
 

@@ -118,24 +118,9 @@ function TripSetup() {
   const [open, setOpen] = React.useState(false);
   const [isCalculating, setIsCalculating] = React.useState(false);
 
-  function setDestination(v: "US" | "Schengen" | "UK") {
-    setIsCalculating(true);
-    updateTrip({ destination: v });
-    setTimeout(() => setIsCalculating(false), 600);
-  }
-
   function setPurpose(v: "Tourist" | "Business") {
     updateTrip({ purpose: v });
   }
-
-  const valid = Boolean(
-    trip?.nationalityCode &&
-      trip?.destinationCountryAlpha2 &&
-      trip?.destination &&
-      trip?.purpose &&
-      trip?.dates.from &&
-      trip?.dates.to
-  );
 
   return (
     <div className="space-y-4">
@@ -170,7 +155,7 @@ function TripSetup() {
           <label className="text-sm font-medium">Purpose</label>
           <Select
             value={trip?.purpose ?? undefined}
-            onValueChange={(v) => setPurpose(v as any)}
+            onValueChange={(v) => setPurpose(v as "Tourist" | "Business")}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select" />
@@ -276,7 +261,12 @@ function Checklist() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
-        <Select value={filter} onValueChange={(v) => setFilter(v as any)}>
+        <Select
+          value={filter}
+          onValueChange={(v) =>
+            setFilter(v as "All" | "Required" | "Recommended" | "Done")
+          }
+        >
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Filter" />
           </SelectTrigger>
@@ -522,7 +512,7 @@ function UploadAndFill() {
               <TableRow key={m.formField} className="transition-colors">
                 <TableCell>{m.extractedKey}</TableCell>
                 <TableCell>
-                  {String((state.extraction as any)[m.extractedKey])}
+                  {String(state.extraction[m.extractedKey])}
                 </TableCell>
                 <TableCell className="font-mono text-xs">
                   {m.formField}
@@ -649,7 +639,7 @@ function WizardInner() {
         type="single"
         collapsible
         value={String(step)}
-        onValueChange={(v) => setStep(Number(v) as any)}
+        onValueChange={(v) => setStep(Number(v) as 1 | 2 | 3 | 4)}
       >
         <AccordionItem value="1">
           <AccordionTrigger>1. Trip Setup</AccordionTrigger>
@@ -680,8 +670,8 @@ function WizardInner() {
       <StickyFooter
         canPrev={step > 1}
         canNext={step < 4}
-        onPrev={() => setStep((s) => (s > 1 ? ((s - 1) as any) : s))}
-        onNext={() => setStep((s) => (s < 4 ? ((s + 1) as any) : s))}
+        onPrev={() => setStep((s) => (s > 1 ? ((s - 1) as 1 | 2 | 3) : s))}
+        onNext={() => setStep((s) => (s < 4 ? ((s + 1) as 2 | 3 | 4) : s))}
         onLaunch={() => setStep(4)}
         disabledReason={requirements[0]}
         showLaunch={step === 4}

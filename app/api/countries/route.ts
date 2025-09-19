@@ -57,9 +57,9 @@ export async function GET() {
   try {
     const countries = await fetchCountries();
     return NextResponse.json({ countries });
-  } catch (err: any) {
+  } catch (err: unknown) {
     return NextResponse.json(
-      { error: err?.message || "Unknown error" },
+      { error: err instanceof Error ? err.message : "Unknown error" },
       { status: 500 }
     );
   }

@@ -73,6 +73,7 @@ export function CountryCombobox({
           >
             {selected ? (
               <span className="flex items-center gap-2 truncate">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={selected.flagSvg}
                   alt={selected.name}
@@ -112,6 +113,7 @@ export function CountryCombobox({
                       setOpen(false);
                     }}
                   >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={c.flagSvg}
                       alt={c.name}

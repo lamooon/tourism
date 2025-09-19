@@ -2,7 +2,6 @@
 
 import type {
   ApplicationMeta,
-  DateRange,
   TripSelections,
   UploadMeta,
 } from "@/types/types";
