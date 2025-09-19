@@ -681,5 +681,9 @@ function WizardInner() {
 }
 
 export default function WizardPage() {
-  return <WizardInner />;
+  return (
+    <React.Suspense fallback={<div>Loading...</div>}>
+      <WizardInner />
+    </React.Suspense>
+  );
 }
