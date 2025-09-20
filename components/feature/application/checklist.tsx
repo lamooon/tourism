@@ -67,6 +67,3 @@ export function Checklist() {
     </div>
   );
 }
-
-
-
