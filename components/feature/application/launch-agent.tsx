@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { useApp } from "@/context/app-context";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,19 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Rocket } from "lucide-react";
 
 export function LaunchAgent() {
-  const { state } = useApp();
-  const reqIds = state.checklist
-    .filter((i) => i.category === "Required")
-    .map((i) => i.id);
-  const allRequiredDone = reqIds.every((id) => state.checklistState[id]);
-  const hasPassport = state.uploads.some((u) =>
-    /pdf|jpeg|png/.test(u.mimeType)
-  );
-  const noBlockingErrors = true;
-  const ready = allRequiredDone && hasPassport && noBlockingErrors;
   const [open, setOpen] = React.useState(false);
 
   return (
