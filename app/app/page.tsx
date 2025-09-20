@@ -68,6 +68,8 @@ function StickyFooter({
   onLaunch,
   disabledReason,
   showLaunch,
+  step,
+  totalSteps,
 }: {
   canPrev: boolean;
   canNext: boolean;
@@ -76,18 +78,28 @@ function StickyFooter({
   onLaunch: () => void;
   disabledReason?: string;
   showLaunch: boolean;
+  step: number;
+  totalSteps: number;
 }) {
   return (
     <div className="sticky bottom-0 left-0 right-0 border-t bg-background/80 backdrop-blur p-4 flex items-center justify-between">
       <div className="text-sm text-muted-foreground">
-        Use Prev/Next to navigate. Progress updates automatically.
+        Step {step} of {totalSteps}
       </div>
       <div className="space-x-2">
-        <Button variant="outline" disabled={!canPrev} onClick={onPrev}>
-          Prev
-        </Button>
+        {canPrev && (
+          <Button variant="outline" onClick={onPrev}>
+            Prev
+          </Button>
+        )}
         {!showLaunch && (
-          <Button variant="outline" disabled={!canNext} onClick={onNext}>
+          <Button
+            variant="default"
+            size="lg"
+            className="font-semibold"
+            disabled={!canNext}
+            onClick={onNext}
+          >
             Next
           </Button>
         )}
@@ -152,7 +164,7 @@ function TripSetup() {
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-medium">Purpose</label>
+          <label className="text-sm font-medium">Purpose of Travel</label>
           <Select
             value={trip?.purpose ?? undefined}
             onValueChange={(v) => setPurpose(v as "Tourist" | "Business")}
@@ -223,9 +235,22 @@ function TripSetup() {
             Visa Type: <Badge variant="secondary">{trip.visaTypeLabel}</Badge>
           </span>
         ) : (
-          <span>Select destination to see visa type.</span>
+          <span>
+            Select nationality and destination to see visa type and
+            requirements.
+          </span>
         )}
       </div>
+      {trip?.visaTypeLabel && state.checklist.length > 0 ? (
+        <div className="text-sm text-muted-foreground flex flex-wrap items-center gap-2">
+          <span>Requirements:</span>
+          {state.checklist
+            .filter((i) => i.category === "Required")
+            .map((i) => (
+              <Badge key={i.id}>{i.title}</Badge>
+            ))}
+        </div>
+      ) : null}
       <div className="text-sm">Next is enabled when all fields are valid.</div>
     </div>
   );
@@ -631,7 +656,7 @@ function WizardInner() {
     <div className="mx-auto w-full max-w-5xl p-6 space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Visa Application</h1>
-        <p className="text-sm text-muted-foreground">Step-by-step wizard</p>
+        <p className="text-sm text-muted-foreground">Step {step} of 4</p>
       </div>
       <Separator />
 
@@ -675,6 +700,8 @@ function WizardInner() {
         onLaunch={() => setStep(4)}
         disabledReason={requirements[0]}
         showLaunch={step === 4}
+        step={step}
+        totalSteps={4}
       />
     </div>
   );
