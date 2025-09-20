@@ -6,7 +6,7 @@ import type {
   MappingItem,
   ChecklistCategory,
   DateRange,
-} from "../types/types";
+} from "@/types/types";
 
 export const DEFAULT_NATIONALITY = "Hong Kong SAR";
 
