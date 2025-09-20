@@ -63,7 +63,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     mappingOverrides: {},
   }));
 
-  // No persistence; in-memory only
+  // No persistence (backend to be implemented later)
 
   function createApplication(): string {
     const id = crypto.randomUUID();

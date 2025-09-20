@@ -3,13 +3,17 @@
 import * as React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useApp } from "@/context/app-context";
-import { Separator } from "@/components/ui/separator";
+import { z } from "zod";
+import { useForm, type UseFormReturn } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -59,6 +63,23 @@ import {
 } from "lucide-react";
 import { CountryCombobox } from "@/components/ui/country-combobox";
 import { visaAreaForDestination } from "@/lib/countries";
+import { Progress } from "@/components/ui/progress";
+
+type TripFormValues = {
+  nationalityCode: string;
+  destinationCountryAlpha2: string;
+  purpose: "Tourist" | "Business";
+  from: string;
+  to: string;
+};
+
+const TripFormSchema = z.object({
+  nationalityCode: z.string().min(1, "Select nationality"),
+  destinationCountryAlpha2: z.string().min(1, "Select destination"),
+  purpose: z.enum(["Tourist", "Business"]),
+  from: z.string().min(1, "Select start date"),
+  to: z.string().min(1, "Select end date"),
+});
 
 function StickyFooter({
   canPrev,
@@ -82,49 +103,51 @@ function StickyFooter({
   totalSteps: number;
 }) {
   return (
-    <div className="sticky bottom-0 left-0 right-0 border-t bg-background/80 backdrop-blur p-4 flex items-center justify-between">
-      <div className="text-sm text-muted-foreground">
-        Step {step} of {totalSteps}
-      </div>
-      <div className="space-x-2">
-        {canPrev && (
-          <Button variant="outline" onClick={onPrev}>
-            Prev
-          </Button>
-        )}
-        {!showLaunch && (
-          <Button
-            variant="default"
-            size="lg"
-            className="font-semibold"
-            disabled={!canNext}
-            onClick={onNext}
-          >
-            Next
-          </Button>
-        )}
-        {showLaunch && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                onClick={onLaunch}
-                className="gap-2"
-                disabled={!!disabledReason}
-              >
-                <Rocket className="size-4" /> Launch Agent
-              </Button>
-            </TooltipTrigger>
-            {disabledReason ? (
-              <TooltipContent>{disabledReason}</TooltipContent>
-            ) : null}
-          </Tooltip>
-        )}
+    <div className="fixed bottom-0 left-0 right-0 z-40 border-t bg-background/80 backdrop-blur">
+      <div className="mx-auto w-full max-w-5xl px-6 py-4 flex items-center justify-between">
+        <div className="text-sm text-muted-foreground">
+          Step {step} of {totalSteps}
+        </div>
+        <div className="space-x-2">
+          {canPrev && (
+            <Button variant="outline" onClick={onPrev}>
+              Prev
+            </Button>
+          )}
+          {!showLaunch && (
+            <Button
+              variant="default"
+              size="lg"
+              className="font-semibold"
+              disabled={!canNext}
+              onClick={onNext}
+            >
+              Next
+            </Button>
+          )}
+          {showLaunch && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={onLaunch}
+                  className="gap-2"
+                  disabled={!!disabledReason}
+                >
+                  <Rocket className="size-4" /> Launch Agent
+                </Button>
+              </TooltipTrigger>
+              {disabledReason ? (
+                <TooltipContent>{disabledReason}</TooltipContent>
+              ) : null}
+            </Tooltip>
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
-function TripSetup() {
+function TripSetup({ form }: { form: UseFormReturn<TripFormValues> }) {
   const { state, updateTrip } = useApp();
   const trip = state.trip;
   const [open, setOpen] = React.useState(false);
@@ -135,124 +158,170 @@ function TripSetup() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <CountryCombobox
-            label="Nationality"
-            placeholder="Select nationality"
-            value={trip?.nationalityCode ?? null}
-            valueKind="alpha3"
-            onChange={(alpha3) => updateTrip({ nationalityCode: alpha3 })}
+    <Form {...form}>
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="nationalityCode"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nationality</FormLabel>
+                <CountryCombobox
+                  placeholder="Select nationality"
+                  value={field.value || null}
+                  valueKind="alpha3"
+                  onChange={(alpha3) => {
+                    field.onChange(alpha3);
+                    updateTrip({ nationalityCode: alpha3 });
+                  }}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="destinationCountryAlpha2"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Destination</FormLabel>
+                <CountryCombobox
+                  placeholder="Select destination country"
+                  value={field.value || null}
+                  valueKind="alpha2"
+                  onChange={(alpha2) => {
+                    field.onChange(alpha2);
+                    setIsCalculating(true);
+                    const area = visaAreaForDestination(alpha2);
+                    updateTrip({
+                      destinationCountryAlpha2: alpha2,
+                      destination: area,
+                    });
+                    setTimeout(() => setIsCalculating(false), 600);
+                  }}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="purpose"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Purpose of Travel</FormLabel>
+                <Select
+                  value={field.value || undefined}
+                  onValueChange={(v) => {
+                    field.onChange(v);
+                    setPurpose(v as "Tourist" | "Business");
+                  }}
+                >
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="Tourist">Tourist</SelectItem>
+                    <SelectItem value="Business">Business</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="from"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Travel Dates</FormLabel>
+                <Popover open={open} onOpenChange={setOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !trip?.dates.from && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 size-4" />
+                      {trip?.dates.from ? (
+                        trip.dates.to ? (
+                          `${trip.dates.from} → ${trip.dates.to}`
+                        ) : (
+                          trip.dates.from
+                        )
+                      ) : (
+                        <span>Pick a date range</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="p-0" align="start">
+                    <Calendar
+                      mode="range"
+                      selected={{
+                        from: trip?.dates.from
+                          ? new Date(trip.dates.from)
+                          : undefined,
+                        to: trip?.dates.to
+                          ? new Date(trip.dates.to)
+                          : undefined,
+                      }}
+                      onSelect={(r) => {
+                        const fromStr = r?.from
+                          ? format(r.from, "yyyy-MM-dd")
+                          : "";
+                        const toStr = r?.to ? format(r.to, "yyyy-MM-dd") : "";
+                        field.onChange(fromStr);
+                        form.setValue("to", toStr, { shouldValidate: true });
+                        updateTrip({
+                          dates: { from: fromStr || null, to: toStr || null },
+                        });
+                      }}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+                {form.formState.errors.to ? (
+                  <p className="text-destructive text-sm">
+                    {String(form.formState.errors.to.message)}
+                  </p>
+                ) : null}
+              </FormItem>
+            )}
           />
         </div>
-        <div className="space-y-2">
-          <CountryCombobox
-            label="Destination"
-            placeholder="Select destination country"
-            value={trip?.destinationCountryAlpha2 ?? null}
-            valueKind="alpha2"
-            onChange={(alpha2) => {
-              setIsCalculating(true);
-              const area = visaAreaForDestination(alpha2);
-              updateTrip({
-                destinationCountryAlpha2: alpha2,
-                destination: area,
-              });
-              setTimeout(() => setIsCalculating(false), 600);
-            }}
-          />
+        <div className="text-sm text-muted-foreground">
+          {isCalculating ? (
+            <span className="animate-pulse">Calculating visa rules…</span>
+          ) : trip?.visaTypeLabel ? (
+            <span>
+              Visa Type: <Badge variant="secondary">{trip.visaTypeLabel}</Badge>
+            </span>
+          ) : (
+            <span>
+              Select nationality and destination to see visa type and
+              requirements.
+            </span>
+          )}
         </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Purpose of Travel</label>
-          <Select
-            value={trip?.purpose ?? undefined}
-            onValueChange={(v) => setPurpose(v as "Tourist" | "Business")}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Tourist">Tourist</SelectItem>
-              <SelectItem value="Business">Business</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Travel Dates</label>
-          <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-full justify-start text-left font-normal",
-                  !trip?.dates.from && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 size-4" />
-                {trip?.dates.from ? (
-                  trip.dates.to ? (
-                    `${trip.dates.from} → ${trip.dates.to}`
-                  ) : (
-                    trip.dates.from
-                  )
-                ) : (
-                  <span>Pick a date range</span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="p-0" align="start">
-              <Calendar
-                mode="range"
-                selected={{
-                  from: trip?.dates.from
-                    ? new Date(trip.dates.from)
-                    : undefined,
-                  to: trip?.dates.to ? new Date(trip.dates.to) : undefined,
-                }}
-                onSelect={(r) =>
-                  updateTrip({
-                    dates: {
-                      from: r?.from ? format(r.from, "yyyy-MM-dd") : null,
-                      to: r?.to ? format(r.to, "yyyy-MM-dd") : null,
-                    },
-                  })
-                }
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-          <p className="text-xs text-muted-foreground">
-            We use dates to compute due dates.
-          </p>
-        </div>
+        {trip?.visaTypeLabel && state.checklist.length > 0 ? (
+          <div className="text-sm text-muted-foreground flex flex-wrap items-center gap-2">
+            <span>Requirements:</span>
+            {state.checklist
+              .filter((i) => i.category === "Required")
+              .map((i) => (
+                <Badge key={i.id}>{i.title}</Badge>
+              ))}
+          </div>
+        ) : null}
+        <div className="text-sm">Next validates required fields.</div>
       </div>
-      <div className="text-sm text-muted-foreground">
-        {isCalculating ? (
-          <span className="animate-pulse">Calculating visa rules…</span>
-        ) : trip?.visaTypeLabel ? (
-          <span>
-            Visa Type: <Badge variant="secondary">{trip.visaTypeLabel}</Badge>
-          </span>
-        ) : (
-          <span>
-            Select nationality and destination to see visa type and
-            requirements.
-          </span>
-        )}
-      </div>
-      {trip?.visaTypeLabel && state.checklist.length > 0 ? (
-        <div className="text-sm text-muted-foreground flex flex-wrap items-center gap-2">
-          <span>Requirements:</span>
-          {state.checklist
-            .filter((i) => i.category === "Required")
-            .map((i) => (
-              <Badge key={i.id}>{i.title}</Badge>
-            ))}
-        </div>
-      ) : null}
-      <div className="text-sm">Next is enabled when all fields are valid.</div>
-    </div>
+    </Form>
   );
 }
 
@@ -623,6 +692,17 @@ function WizardInner() {
   const router = useRouter();
   const appId = sp.get("appId");
   const [step, setStep] = React.useState<1 | 2 | 3 | 4>(1);
+  const tripForm = useForm<TripFormValues>({
+    resolver: zodResolver(TripFormSchema),
+    defaultValues: {
+      nationalityCode: state.trip?.nationalityCode ?? "",
+      destinationCountryAlpha2: state.trip?.destinationCountryAlpha2 ?? "",
+      purpose: (state.trip?.purpose as "Tourist" | "Business") ?? "Tourist",
+      from: state.trip?.dates.from ?? "",
+      to: state.trip?.dates.to ?? "",
+    },
+    mode: "onSubmit",
+  });
 
   React.useEffect(() => {
     const isNew = sp.get("new") === "1";
@@ -642,6 +722,18 @@ function WizardInner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appId]);
 
+  React.useEffect(() => {
+    if (!state.trip) return;
+    tripForm.reset({
+      nationalityCode: state.trip.nationalityCode ?? "",
+      destinationCountryAlpha2: state.trip.destinationCountryAlpha2 ?? "",
+      purpose: (state.trip.purpose as "Tourist" | "Business") ?? "Tourist",
+      from: state.trip.dates.from ?? "",
+      to: state.trip.dates.to ?? "",
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.trip]);
+
   const requirements: string[] = [];
   const reqIds = state.checklist
     .filter((i) => i.category === "Required")
@@ -652,51 +744,74 @@ function WizardInner() {
   if (!state.uploads.length)
     requirements.push("Upload at least one identity document");
 
-  return (
-    <div className="mx-auto w-full max-w-5xl p-6 space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Visa Application</h1>
-        <p className="text-sm text-muted-foreground">Step {step} of 4</p>
-      </div>
-      <Separator />
+  async function handleNext() {
+    if (step === 1) {
+      const ok = await tripForm.trigger(undefined, { shouldFocus: true });
+      if (!ok) {
+        toast.error("Please complete required fields.");
+        return;
+      }
+    }
+    setStep((s) => (s < 4 ? ((s + 1) as 2 | 3 | 4) : s));
+  }
 
-      <Accordion
-        type="single"
-        collapsible
-        value={String(step)}
-        onValueChange={(v) => setStep(Number(v) as 1 | 2 | 3 | 4)}
-      >
-        <AccordionItem value="1">
-          <AccordionTrigger>1. Trip Setup</AccordionTrigger>
-          <AccordionContent>
-            <TripSetup />
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="2">
-          <AccordionTrigger>2. Checklist</AccordionTrigger>
-          <AccordionContent>
-            <Checklist />
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="3">
-          <AccordionTrigger>3. Upload & Fill</AccordionTrigger>
-          <AccordionContent>
-            <UploadAndFill />
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="4">
-          <AccordionTrigger>4. Launch Agent</AccordionTrigger>
-          <AccordionContent>
-            <LaunchAgent />
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+  return (
+    <div className="mx-auto w-full max-w-5xl p-6 pb-24 space-y-6">
+      <div className="sticky top-0 z-40 -mx-6 px-6 py-4 bg-background/80 backdrop-blur border-b">
+        {(() => {
+          const steps = [
+            { id: 1, title: "Trip Setup" },
+            { id: 2, title: "Checklist" },
+            { id: 3, title: "Upload & Fill" },
+            { id: 4, title: "Launch Agent" },
+          ];
+          const pct = Math.round((step / steps.length) * 100);
+          const current = steps[step - 1]?.title ?? "";
+          const isSaving = false; // UI-only; backend save pending implementation
+          return (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <Progress value={pct} />
+                </div>
+                <div className="ml-4 flex items-center gap-3">
+                  <span className="text-xs text-muted-foreground">
+                    Unsaved changes
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => (window.location.href = "/dashboard")}
+                  >
+                    Save & Exit
+                  </Button>
+                </div>
+              </div>
+              <div className="text-xs text-muted-foreground">
+                Step {step} of {steps.length}: {current}
+              </div>
+            </div>
+          );
+        })()}
+      </div>
+
+      <div>
+        {step === 1 ? (
+          <TripSetup form={tripForm} />
+        ) : step === 2 ? (
+          <Checklist />
+        ) : step === 3 ? (
+          <UploadAndFill />
+        ) : (
+          <LaunchAgent />
+        )}
+      </div>
 
       <StickyFooter
         canPrev={step > 1}
         canNext={step < 4}
         onPrev={() => setStep((s) => (s > 1 ? ((s - 1) as 1 | 2 | 3) : s))}
-        onNext={() => setStep((s) => (s < 4 ? ((s + 1) as 2 | 3 | 4) : s))}
+        onNext={handleNext}
         onLaunch={() => setStep(4)}
         disabledReason={requirements[0]}
         showLaunch={step === 4}
