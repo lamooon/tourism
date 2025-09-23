@@ -12,6 +12,7 @@ export interface DateRange {
 }
 
 export interface TripSelections {
+  id?: string;
   // nationalityCode stores ISO alpha-3 (ICAO-compatible) e.g., HKG
   nationalityCode: string;
   // Destination country by ISO alpha-2 (for flags + visa area mapping)

@@ -18,15 +18,17 @@ import {
   TripFormSchema,
   type TripFormValues,
 } from "@/components/feature/application/trip-form";
-import {useUser} from "@stackframe/stack";
+import { useUser } from "@stackframe/stack";
 
 export function Wizard() {
   useUser({ or: "redirect" });
+  const user = useUser();
   const { state, loadApplication, createApplication } = useApp();
   const sp = useSearchParams();
   const router = useRouter();
   const appId = sp.get("appId");
   const [step, setStep] = React.useState<1 | 2 | 3 | 4>(1);
+
   const tripForm = useForm<TripFormValues>({
     resolver: zodResolver(TripFormSchema),
     defaultValues: {
@@ -85,6 +87,36 @@ export function Wizard() {
       if (!ok) {
         toast.error("Please complete required fields.");
         return;
+      }
+
+      // 🚀 Persist trip to backend if not already created
+      if (!state.trip?.id) {
+        try {
+          const values = tripForm.getValues();
+          const res = await fetch("/api/trips/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              nationality: values.nationalityCode,
+              destination: values.destinationCountryAlpha2,
+              purpose: values.purpose,
+              departure_date: values.from,
+              arrival_date: values.to,
+              userId: user?.id
+            }),
+          });
+
+          if (!res.ok) throw new Error("Failed to create trip");
+          const trip = await res.json();
+
+          // update global context with this trip id
+          loadApplication(trip.id);
+          toast.success("Trip created!");
+        } catch (err) {
+          console.error(err);
+          toast.error("Could not save trip");
+          return;
+        }
       }
     }
     setStep((s) => (s < 4 ? ((s + 1) as 2 | 3 | 4) : s));

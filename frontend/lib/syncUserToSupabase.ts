@@ -12,7 +12,6 @@ if (!supabaseUrl || !supabaseServiceKey) {
 const supabaseServer = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function syncUserToSupabase(user: { id: string; displayName?: string | null }) {
-  console.log(`[Supabase Sync] Attempting to upsert user: ${user.id}`);
 
   const { error } = await supabaseServer.from("users").upsert(
     {
@@ -28,5 +27,4 @@ export async function syncUserToSupabase(user: { id: string; displayName?: strin
     throw new Error(`Failed to sync user to Supabase: ${error.message}`);
   }
 
-  console.log(`[Supabase Sync] Successfully upserted user: ${user.id}`);
 }
