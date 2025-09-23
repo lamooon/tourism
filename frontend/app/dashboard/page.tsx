@@ -22,6 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Plus, Trash2, Copy, Eye } from "lucide-react";
+import {useUser} from "@stackframe/stack";
 
 function DashboardInner() {
   const router = useRouter();

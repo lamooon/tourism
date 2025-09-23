@@ -10,6 +10,7 @@ export default function Page() {
   const user = useUser();
   const supabase = createSupabaseClient();
   const [data, setData] = useState<null | any[]>(null);
+  useUser({ or: "redirect" });
 
   useEffect(() => {
     supabase.from("data").select().then(({ data }) => setData(data ?? []));
