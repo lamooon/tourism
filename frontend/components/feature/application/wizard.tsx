@@ -18,8 +18,10 @@ import {
   TripFormSchema,
   type TripFormValues,
 } from "@/components/feature/application/trip-form";
+import {useUser} from "@stackframe/stack";
 
 export function Wizard() {
+  useUser({ or: "redirect" });
   const { state, loadApplication, createApplication } = useApp();
   const sp = useSearchParams();
   const router = useRouter();
