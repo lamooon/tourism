@@ -6,3 +6,4 @@ pytesseract==0.3.13
 python-dotenv==1.1.1
 supabase==2.20.0
 gunicorn
+django-cors-headers
