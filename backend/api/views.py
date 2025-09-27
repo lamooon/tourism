@@ -10,6 +10,8 @@ import PyPDF2
 import io
 import re
 from datetime import datetime
+from rest_framework.response import Response
+import platform, datetime
 
 supabase = settings.SUPABASE_CLIENT
 
@@ -246,3 +248,13 @@ def supabase_ping(request):
         return Response({"status": r.status_code, "body": r.text})
     except Exception as e:
         return Response({"error": str(e)}, status=500)
+
+
+@api_view(["GET"])
+def local_health(request):
+    return Response({
+        "status": "ok",
+        "message": "This is local health check, no egress",
+        "time": datetime.datetime.utcnow().isoformat() + "Z",
+        "python_version": platform.python_version()
+    })

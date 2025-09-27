@@ -57,8 +57,7 @@ TEMPLATES = [
         },
     },
 ]
-WSGI_APPLICATION = 'backend.wsgi.app'
-
+WSGI_APPLICATION = 'backend.wsgi.application'
 # ORM 제거
 DATABASES = {}
 
