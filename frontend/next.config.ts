@@ -10,12 +10,8 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        source: "/api/:path*/",                 // matches with trailing slash
-        destination: `${backendUrl}/api/:path*/`, // preserves trailing slash
-      },
-      {
-        source: "/api/:path*",                  // fallback if no slash
-        destination: `${backendUrl}/api/:path*/`, // force add trailing slash
+        source: "/api/:path*",
+        destination: `${backendUrl}/api/:path*`,
       },
     ];
   }
