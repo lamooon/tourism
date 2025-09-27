@@ -2,24 +2,28 @@
 """
 Simple test script for the getChecklist API endpoint.
 This script creates sample data and tests the API functionality.
+Now updated to safely handle non-JSON responses.
 """
+
 import os
 import sys
 import django
-import json
 from django.conf import settings
-from supabase import create_client
+import json
 
-# Setup Django
+# Add the backend directory to the path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+
+# Setup Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
 django.setup()
 
 supabase = settings.SUPABASE_CLIENT
 
+
 def create_sample_data():
-    """Insert sample data via Supabase."""
+    """Insert sample data into Supabase required_docs table."""
     us_data = supabase.table("required_docs").upsert({
         "destination_country": "US",
         "passport": True,
@@ -49,34 +53,54 @@ def create_sample_data():
         ])
     }).execute()
 
-    print("Sample data inserted via Supabase!")
-    print(us_data.data)
-    print(uk_data.data)
+    print("✅ Sample data inserted via Supabase!")
+    print("US data:", us_data.data)
+    print("UK data:", uk_data.data)
+
+
+def print_response(label, response):
+    """Helper to safely print API responses."""
+    print(f"\n=== {label} ===")
+    print("Status Code:", response.status_code)
+    ctype = response.headers.get("Content-Type", "")
+    if "application/json" in ctype:
+        try:
+            print("Response:", json.dumps(response.json(), indent=2))
+        except Exception as e:
+            print("⚠️ Error parsing JSON:", str(e))
+            print("Raw content:", response.content.decode())
+    else:
+        print("⚠️ Non-JSON response (Content-Type:", ctype, ")")
+        print("Raw content:", response.content.decode())
 
 
 def test_api_endpoint():
+    """Test the API endpoint with sample requests."""
     from django.test import Client
     client = Client()
 
-    print("\n=== Testing US requirements ===")
-    response = client.get('/api/application/123/checklist?destination_country=US')
-    print(response.status_code, response.json())
+    # Test 1: Valid request for US
+    resp = client.get('/api/application/123/checklist?destination_country=US')
+    print_response("Testing US requirements", resp)
 
-    print("\n=== Testing UK requirements ===")
-    response = client.get('/api/application/456/checklist?destination_country=GB')
-    print(response.status_code, response.json())
+    # Test 2: Valid request for GB
+    resp = client.get('/api/application/456/checklist?destination_country=GB')
+    print_response("Testing UK requirements", resp)
 
-    print("\n=== Missing parameter ===")
-    response = client.get('/api/application/789/checklist')
-    print(response.status_code, response.json())
+    # Test 3: Missing parameter
+    resp = client.get('/api/application/789/checklist')
+    print_response("Testing missing parameter", resp)
 
-    print("\n=== Invalid country ===")
-    response = client.get('/api/application/999/checklist?destination_country=XX')
-    print(response.status_code, response.json())
+    # Test 4: Invalid country
+    resp = client.get('/api/application/999/checklist?destination_country=XX')
+    print_response("Testing invalid country", resp)
 
 
 if __name__ == '__main__':
     print("Creating sample data...")
     create_sample_data()
-    print("Running API tests...")
+
+    print("\nTesting API endpoint...")
     test_api_endpoint()
+
+    print("\n✅ Test completed!")
