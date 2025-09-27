@@ -93,6 +93,7 @@ export function Wizard() {
       if (!state.trip?.id) {
         try {
           const values = tripForm.getValues();
+          console.log("creating trip with userId:", user?.id);
           const res = await fetch("/api/trips/", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
