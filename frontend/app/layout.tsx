@@ -31,10 +31,9 @@ export default function RootLayout({
             {/* CHANGE 2: Add inner container for alignment and spacing */}
             <div className="flex justify-between items-center mx-auto max-w-7xl p-4">
 
-              {/* CHANGE 3: Restore hover effects and add clickable padding (p-2) */}
               <Link
                 href="/"
-                className="text-xl font-bold cursor-pointer p-2 rounded-md transition-colors duration-200 hover:bg-gray-800"
+                className="text-xl font-bold cursor-pointer p-2 rounded-md transition-colors duration-200"
               >
                 Smart Tourism
               </Link>
