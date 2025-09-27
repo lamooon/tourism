@@ -33,7 +33,7 @@ class TripListCreateView(APIView):
         }
 
         try:
-            res = supabase.table("trips").insert(trip).execute()
+            res = supabase.table("trips").insert([trip]).execute()
         except Exception as e:
             return Response({"error": f"Supabase insert failed: {str(e)}"}, status=500)
 
