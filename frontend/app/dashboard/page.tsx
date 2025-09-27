@@ -43,21 +43,6 @@ function DashboardInner() {
   const apps = state.applications;
 
   return (
-    // START ADDITION: Main Header for "Smart Tourism" link
-    <header className="flex items-center justify-between mx-auto w-full max-w-6xl px-6 pt-6">
-        {/* The clickable logo/title */}
-        <div 
-          className="text-xl font-extrabold tracking-widest px-3 py-1 rounded-md transition-colors duration-200 hover:bg-gray-100 cursor-pointer"
-          onClick={handleHome} // This links to router.push('/')
-        >
-          Smart Tourism
-        </div>
-        {/* Placeholder for user-specific data (e.g., user icon, name) */}
-        <div className="text-sm text-muted-foreground">
-            {/* You would place a <UserAvatar /> or similar component here */}
-        </div>
-      </header>
-    // END ADDITION: Main Header
     <div className="mx-auto w-full max-w-6xl p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
