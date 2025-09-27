@@ -10,7 +10,6 @@ import PyPDF2
 import io
 import re
 from datetime import datetime
-from rest_framework.response import Response
 import platform, datetime
 
 supabase = settings.SUPABASE_CLIENT
@@ -33,6 +32,7 @@ class TripListCreateView(APIView):
         }
 
         try:
+            # ✅ Must pass a list of dicts
             res = supabase.table("trips").insert([trip]).execute()
         except Exception as e:
             return Response({"error": f"Supabase insert failed: {str(e)}"}, status=500)
@@ -53,6 +53,7 @@ class TripDetailView(APIView):
         if not res.data:
             return Response({"error": "Not found"}, status=404)
         return Response(res.data[0], status=200)
+
 
 class RulesView(APIView):
     def get(self, request):
@@ -121,6 +122,7 @@ def getChecklist(request, id):
     except Exception as e:
         return Response({'error': str(e)}, status=500)
 
+
 @api_view(['POST'])
 def exportUserData(request, id):
     try:
@@ -154,14 +156,16 @@ def exportUserData(request, id):
 
         parsed_data = parse_document_text(extracted_text)
         trip_data = {
-            "user_id": id,
+            # ✅ must be "userId" to match trips schema
+            "userId": id,
             "nationality": parsed_data.get("nationality", ""),
             "destination": parsed_data.get("destination", ""),
             "purpose": parsed_data.get("purpose", ""),
             "departure_date": parsed_data.get("departure_date"),
             "arrival_date": parsed_data.get("arrival_date"),
         }
-        res = supabase.table("trips").insert(trip_data).execute()
+
+        res = supabase.table("trips").insert([trip_data]).execute()  # ✅ list wrapper
         if hasattr(res, "error") and res.error:
             return Response({"error": str(res.error)}, status=500)
         if not res.data:
@@ -176,6 +180,7 @@ def exportUserData(request, id):
 
     except Exception as e:
         return Response({'error': f'Unexpected error: {str(e)}'}, status=500)
+
 
 def parse_document_text(text):
     parsed_data = {}
@@ -237,6 +242,7 @@ def parse_document_text(text):
         parsed_data['arrival_date'] = parsed_dates[1]
 
     return parsed_data
+
 
 @api_view(["GET"])
 def supabase_ping(request):
