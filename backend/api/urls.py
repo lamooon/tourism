@@ -6,7 +6,8 @@ def healthcheck(request):
 
 urlpatterns = [
     path("health/", healthcheck, name="health"),
-    path("trips/", views.TripListCreateView.as_view(), name="trip-list-create"),
+    path("trips", views.TripListCreateView.as_view(), name="trip-list-create-no-slash"),   # no slash
+    path("trips/", views.TripListCreateView.as_view(), name="trip-list-create"),           # with slash
     path("trips/<str:id>/", views.TripDetailView.as_view(), name="trip-detail"),
     path("rules/", views.RulesView.as_view(), name="rules"),
     path("application/<str:id>/checklist/", views.getChecklist, name="checklist"),
