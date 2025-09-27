@@ -30,7 +30,11 @@ class TripListCreateView(APIView):
             "arrival_date": data.get("arrival_date"),
         }
 
-        res = supabase.table("trips").insert(trip).execute()
+        try:
+            res = supabase.table("trips").insert(trip).execute()
+        except Exception as e:
+            return Response({"error": f"Supabase insert failed: {str(e)}"}, status=500)
+
         if hasattr(res, "error") and res.error:
             return Response({"error": str(res.error)}, status=500)
         if not res.data:
