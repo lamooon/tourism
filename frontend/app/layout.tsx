@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 export default function RootLayout({
                                      children,
                                    }: Readonly<{ children: React.ReactNode }>) {
-  return (
+ return (
     <html lang="en" className="dark" style={{ colorScheme: "dark" }}>
     <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
     <StackProvider app={stackServerApp}>
@@ -28,14 +28,13 @@ export default function RootLayout({
         <AppProvider>
           <UserSync>
             <header className="flex justify-between items-center p-4 border-b">
-              {/* CHANGE: Replaced <h1> with <Link> and added click/hover styles */}
+              {/* The Link component now has minimal styling, maintaining the original position */}
               <Link
-                href="/" // Sets the target URL to the home page
-                className="text-xl font-bold px-3 py-1 rounded-md transition-colors duration-200 hover:bg-gray-100 cursor-pointer" // Added padding, rounded corners, and hover effect
+                href="/" 
+                className="text-xl font-bold cursor-pointer"
               >
                 Smart Tourism
               </Link>
-              {/* END CHANGE */}
               <UserButton showUserInfo={true} />
             </header>
             <main className="flex-1 p-4">{children}</main>
