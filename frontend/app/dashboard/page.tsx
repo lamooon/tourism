@@ -35,6 +35,10 @@ function DashboardInner() {
   function handleView(id: string) {
     router.push(`/app?appId=${id}`);
   }
+  
+  function handleHome() {
+    router.push(`/`);
+  }
 
   const apps = state.applications;
 
@@ -61,11 +65,7 @@ function DashboardInner() {
               Get started by creating your first application.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Button onClick={handleNew} className="gap-2">
-              <Plus className="size-4" /> New Application
-            </Button>
-          </CardContent>
+          
         </Card>
       ) : (
         <Card>
