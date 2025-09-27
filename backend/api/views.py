@@ -235,3 +235,14 @@ def parse_document_text(text):
         parsed_data['arrival_date'] = parsed_dates[1]
 
     return parsed_data
+
+@api_view(["GET"])
+def supabase_ping(request):
+    import requests, os
+    url = os.environ["SUPABASE_URL"] + "/rest/v1/"
+    key = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
+    try:
+        r = requests.get(url, headers={"apikey": key, "Authorization": f"Bearer {key}"})
+        return Response({"status": r.status_code, "body": r.text})
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
