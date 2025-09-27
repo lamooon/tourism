@@ -16,6 +16,7 @@ supabase = settings.SUPABASE_CLIENT
 
 class TripListCreateView(APIView):
     def post(self, request):
+        print(">>> PATH:", request.path)
         data = request.data
         for f in ["nationality", "destination", "purpose"]:
             if f not in data:
