@@ -22,7 +22,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Plus, Trash2, Copy, Eye } from "lucide-react";
-import {useUser} from "@stackframe/stack";
+// Remove unused import
+// import {useUser} from "@stackframe/stack";
 
 function DashboardInner() {
   const router = useRouter();
@@ -35,10 +36,11 @@ function DashboardInner() {
   function handleView(id: string) {
     router.push(`/app?appId=${id}`);
   }
-  
-  function handleHome() {
-    router.push(`/`);
-  }
+
+  // Remove unused function
+  // function handleHome() {
+  //   router.push(`/`);
+  // }
 
   const apps = state.applications;
 
@@ -65,7 +67,6 @@ function DashboardInner() {
               Get started by creating your first application.
             </CardDescription>
           </CardHeader>
-          
         </Card>
       ) : (
         <Card>

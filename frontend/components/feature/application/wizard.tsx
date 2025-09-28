@@ -5,7 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useApp } from "@/context/app-context";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
+// Remove unused Button import
+// import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,6 +31,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { AlertTriangle } from "lucide-react";
+
+// Add proper type for router
+type NextRouter = ReturnType<typeof useRouter>;
 
 export function Wizard() {
   useUser({ or: "redirect" });
@@ -218,7 +222,6 @@ export function Wizard() {
   const current = steps[step - 1]?.title ?? "";
 
   // --- navigation guard ---
-  // --- navigation guard ---
   React.useEffect(() => {
     // case 1: intercept all link clicks (including Next.js Link components)
     const handleClick = (e: MouseEvent) => {
@@ -265,6 +268,7 @@ export function Wizard() {
       document.removeEventListener("click", handleClick, true);
     };
   }, [hasUnsavedChanges, isNavigating]);
+
   // --- intercept Next.js router navigation ---
   React.useEffect(() => {
     if (!hasUnsavedChanges || isNavigating) return;
@@ -272,29 +276,34 @@ export function Wizard() {
     const originalPush = router.push;
     const originalReplace = router.replace;
 
-    router.push = function(href: string, options?: any) {
+    // Create properly typed versions
+    const interceptedPush = function(href: string, options?: Record<string, unknown>) {
       console.log("Router.push intercepted:", href);
       if (href === "/" || href.includes("/dashboard") || (!href.includes("/app") && href.startsWith("/"))) {
         setNextUrl(href);
         setShowLeaveDialog(true);
         return Promise.resolve(false);
       }
-      return originalPush.call(this, href, options);
+      return originalPush.call(router, href, options);
     };
 
-    router.replace = function(href: string, options?: any) {
+    const interceptedReplace = function(href: string, options?: Record<string, unknown>) {
       console.log("Router.replace intercepted:", href);
       if (href === "/" || href.includes("/dashboard") || (!href.includes("/app") && href.startsWith("/"))) {
         setNextUrl(href);
         setShowLeaveDialog(true);
         return Promise.resolve(false);
       }
-      return originalReplace.call(this, href, options);
+      return originalReplace.call(router, href, options);
     };
 
+    // Override the router methods
+    (router as NextRouter & { push: typeof interceptedPush }).push = interceptedPush;
+    (router as NextRouter & { replace: typeof interceptedReplace }).replace = interceptedReplace;
+
     return () => {
-      router.push = originalPush;
-      router.replace = originalReplace;
+      (router as NextRouter).push = originalPush;
+      (router as NextRouter).replace = originalReplace;
     };
   }, [hasUnsavedChanges, router, isNavigating]);
 
