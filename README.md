@@ -1,4 +1,4 @@
-# Visa Wizard ✈️
+# Smart Tourism ✈️
 AI-Powered Visa Application Assistant for AWS Hackathon 2025
 
 ## Problem
@@ -16,4 +16,5 @@ AI-driven agent that automates the entire visa workflow:
 1. Select destination → AI shows requirements checklist
 2. Enter travel details → AI determines visa type automatically
 3. Upload documents → OCR extracts data, pre-fills forms
+
 
