@@ -35,6 +35,7 @@ const AppContext = React.createContext<{
   loadApplication: (id: string) => void;
   deleteApplication: (id: string) => void;
   duplicateApplication: (id: string) => string;
+  clearCurrentApplication: () => void;
   updateTrip: (next: Partial<TripSelections>) => void;
   toggleChecklistItem: (id: string) => void;
   setUploads: (uploads: UploadMeta[]) => void;
@@ -50,20 +51,20 @@ function calcProgress(
   return Math.round((done / checklist.length) * 100);
 }
 
-export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = React.useState<AppState>(() => ({
-    applications: [],
-    currentAppId: null,
-    trip: null,
-    checklist: [],
-    checklistState: {},
-    uploads: [],
-    extraction: MOCK_EXTRACTION,
-    mapping: MOCK_MAPPING,
-    mappingOverrides: {},
-  }));
+const initialState: AppState = {
+  applications: [],
+  currentAppId: null,
+  trip: null,
+  checklist: [],
+  checklistState: {},
+  uploads: [],
+  extraction: MOCK_EXTRACTION,
+  mapping: MOCK_MAPPING,
+  mappingOverrides: {},
+};
 
-  // No persistence (backend to be implemented later)
+export function AppProvider({ children }: { children: React.ReactNode }) {
+  const [state, setState] = React.useState<AppState>(initialState);
 
   function createApplication(): string {
     const id = crypto.randomUUID();
@@ -130,6 +131,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return newId;
   }
 
+  function clearCurrentApplication() {
+    console.log("Clearing current application, currentAppId:", state.currentAppId);
+
+    // Force a complete reset to initial state
+    setState(initialState);
+
+    // Also clear any localStorage or sessionStorage if you're using it
+    if (typeof window !== 'undefined') {
+      // Clear any stored data that might be persisting
+      localStorage.removeItem('currentApp'); // if you store anything in localStorage
+      sessionStorage.clear(); // clear session storage
+    }
+  }
+
   function updateTrip(next: Partial<TripSelections>) {
     if (!state.currentAppId) return;
     const current = state.trip ?? {
@@ -150,13 +165,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const apps = state.applications.map((a) =>
       a.id === state.currentAppId
         ? {
-            ...a,
-            destination: merged.destination,
-            visaTypeLabel,
-            purpose: merged.purpose,
-            dates: merged.dates,
-            progressPct: calcProgress(checklist, state.checklistState),
-          }
+          ...a,
+          destination: merged.destination,
+          visaTypeLabel,
+          purpose: merged.purpose,
+          dates: merged.dates,
+          progressPct: calcProgress(checklist, state.checklistState),
+        }
         : a
     );
 
@@ -195,6 +210,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       loadApplication,
       deleteApplication,
       duplicateApplication,
+      clearCurrentApplication,
       updateTrip,
       toggleChecklistItem,
       setUploads,
