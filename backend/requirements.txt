@@ -1,5 +1,4 @@
---index-url https://download.pytorch.org/whl/cpu
-
+--extra-index-url https://download.pytorch.org/whl/cpu
 # Django and related packages
 Django==5.0.6
 djangorestframework==3.16.1
