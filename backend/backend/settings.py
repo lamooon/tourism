@@ -4,8 +4,8 @@ from supabase import create_client
 from dotenv import load_dotenv
 
 # Load from backend directory first, then root directory as fallback
-load_dotenv(Path(__file__).resolve().parent.parent / '.env.local')
-load_dotenv(Path(__file__).resolve().parent.parent.parent / '.env.local')
+load_dotenv(Path(__file__).resolve().parent.parent / '.env')
+load_dotenv(Path(__file__).resolve().parent.parent.parent / '.env')
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")

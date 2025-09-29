@@ -2,12 +2,12 @@ Django==5.0.6
 djangorestframework==3.16.1
 Pillow==11.3.0
 PyPDF2==3.0.1
-easyocr==1.7.0
-numpy==1.24.3
-opencv-python-headless==4.8.0.74
-torch==2.0.1
-torchvision==0.15.2
 python-dotenv==1.1.1
 supabase==2.20.0
 gunicorn
 django-cors-headers
+opencv-python-headless==4.10.0.84
+torch==2.5.1
+torchvision==0.20.1
+numpy==1.26.4
+easyocr==1.7.1
