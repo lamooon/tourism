@@ -39,6 +39,7 @@ const AppContext = React.createContext<{
   updateTrip: (next: Partial<TripSelections>) => void;
   toggleChecklistItem: (id: string) => void;
   setUploads: (uploads: UploadMeta[]) => void;
+  setExtraction: (extraction: ExtractionResult) => void;
   updateMappingValue: (formField: string, value: string | number) => void;
 } | null>(null);
 
@@ -197,6 +198,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setState((s) => ({ ...s, uploads }));
   }
 
+  function setExtraction(extraction: ExtractionResult) {
+    if (!state.currentAppId) return;
+    setState((s) => ({ ...s, extraction }));
+  }
+
   function updateMappingValue(formField: string, value: string | number) {
     if (!state.currentAppId) return;
     const next = { ...state.mappingOverrides, [formField]: value };
@@ -214,6 +220,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updateTrip,
       toggleChecklistItem,
       setUploads,
+      setExtraction,
       updateMappingValue,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps

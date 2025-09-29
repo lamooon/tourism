@@ -17,13 +17,48 @@ import { ClipboardCopy, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 export function UploadAndFill() {
-  const { state, setUploads, updateMappingValue } = useApp();
+  const { state, setUploads, setExtraction, updateMappingValue } = useApp();
   const inputRef = React.useRef<HTMLInputElement | null>(null);
+
+  async function processUploadedFile(file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    try {
+      // Use the current application ID or fallback to user ID
+      const userId = state.currentAppId || 'temp-user-id';
+      
+      const response = await fetch(`/api/upload/${userId}/`, {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Upload failed: ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      
+      // Update the extraction state with real data from backend
+      if (result.extracted_data) {
+        setExtraction(result.extracted_data);
+        toast.success('Document processed successfully!');
+      } else {
+        toast.error('No data could be extracted from the document');
+      }
+      
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error(`Failed to process document: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
 
   function onFiles(files: FileList | null) {
     if (!files || files.length === 0) return;
     const accepted = ["application/pdf", "image/jpeg", "image/png"];
     const next: typeof state.uploads = [];
+    const filesToProcess: File[] = [];
+    
     for (const f of Array.from(files)) {
       const tooBig = f.size > 10 * 1024 * 1024;
       const wrongType = !accepted.includes(f.type);
@@ -42,8 +77,17 @@ export function UploadAndFill() {
         mimeType: f.type,
         status: "Uploaded",
       });
+      filesToProcess.push(f);
     }
-    if (next.length) setUploads([...(state.uploads ?? []), ...next]);
+    
+    if (next.length) {
+      setUploads([...(state.uploads ?? []), ...next]);
+      
+      // Process the first uploaded file for OCR
+      if (filesToProcess.length > 0) {
+        processUploadedFile(filesToProcess[0]);
+      }
+    }
   }
 
   function onCopyMapping() {

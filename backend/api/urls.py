@@ -12,4 +12,6 @@ urlpatterns = [
     path("rules/", views.RulesView.as_view(), name="rules"),
     path("application/<str:id>/checklist/", views.getChecklist, name="checklist"),
     path("application/<str:id>/autofill/export/", views.exportUserData, name="export-data"),
+    path("upload/<str:id>", views.exportUserData, name="upload-and-extract-no-slash"),  # Frontend calls this without slash
+    path("upload/<str:id>/", views.exportUserData, name="upload-and-extract"),  # Frontend calls this with slash
 ]

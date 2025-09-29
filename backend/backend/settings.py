@@ -3,7 +3,8 @@ import os
 from supabase import create_client
 from dotenv import load_dotenv
 
-load_dotenv()
+# Load from backend directory first, then root directory as fallback
+load_dotenv(Path(__file__).resolve().parent.parent / '.env.local')
 load_dotenv(Path(__file__).resolve().parent.parent.parent / '.env.local')
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
@@ -73,3 +74,6 @@ USE_TZ = True
 STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_ALL_ORIGINS = True
+
+# Disable APPEND_SLASH to avoid issues with API endpoints
+APPEND_SLASH = False
