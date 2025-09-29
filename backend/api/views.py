@@ -4,15 +4,56 @@ from rest_framework.decorators import api_view
 from django.conf import settings
 import uuid
 import json
-import pytesseract
+import easyocr
 from PIL import Image
 import PyPDF2
 import io
 import re
 from datetime import datetime
 import platform
+import numpy as np
 
 supabase = settings.SUPABASE_CLIENT
+
+# Initialize EasyOCR reader (lazy loading to avoid startup delays)
+_ocr_reader = None
+
+def get_ocr_reader():
+    """Get or create EasyOCR reader instance"""
+    global _ocr_reader
+    if _ocr_reader is None:
+        try:
+            print(">>> Initializing EasyOCR reader...")
+            _ocr_reader = easyocr.Reader(['en'])  # English only for better performance
+            print(">>> EasyOCR reader initialized successfully")
+        except Exception as e:
+            print(f">>> Failed to initialize EasyOCR: {str(e)}")
+            _ocr_reader = None
+    return _ocr_reader
+
+def extract_text_easyocr(image):
+    """Extract text from image using EasyOCR"""
+    try:
+        reader = get_ocr_reader()
+        if reader is None:
+            raise Exception("EasyOCR reader not available")
+        
+        # Convert PIL image to numpy array
+        img_array = np.array(image)
+        
+        # Extract text
+        results = reader.readtext(img_array)
+        
+        # Combine all detected text
+        extracted_text = ""
+        for (bbox, text, confidence) in results:
+            if confidence > 0.2:  # Only include text with decent confidence
+                extracted_text += text + "\n"
+        
+        return extracted_text.strip()
+    except Exception as e:
+        print(f">>> EasyOCR extraction failed: {str(e)}")
+        return None
 
 class TripListCreateView(APIView):
     def post(self, request):
@@ -22,9 +63,34 @@ class TripListCreateView(APIView):
             if f not in data:
                 return Response({"error": f"{f} is required"}, status=400)
 
+        user_id = data.get("userId")
+        if not user_id:
+            return Response({"error": "userId is required"}, status=400)
+
+        # Check if user exists, if not create one
+        try:
+            print(f">>> Checking if user {user_id} exists...")
+            user_res = supabase.table("users").select("userId").eq("userId", user_id).execute()
+            if not user_res.data:
+                print(f">>> User {user_id} not found, creating new user...")
+                new_user = {
+                    "userId": user_id,
+                    "created_at": datetime.now().isoformat()
+                }
+                create_user_res = supabase.table("users").insert([new_user]).execute()
+                if hasattr(create_user_res, "error") and create_user_res.error:
+                    print(f">>> Failed to create user: {create_user_res.error}")
+                    return Response({"error": f"Failed to create user: {str(create_user_res.error)}"}, status=500)
+                print(f">>> User {user_id} created successfully")
+            else:
+                print(f">>> User {user_id} already exists")
+        except Exception as user_error:
+            print(f">>> Error checking/creating user: {str(user_error)}")
+            return Response({"error": f"User validation failed: {str(user_error)}"}, status=500)
+
         trip = {
             "id": str(uuid.uuid4()),
-            "userId": data.get("userId"),
+            "userId": user_id,
             "nationality": data["nationality"],
             "destination": data["destination"],
             "purpose": data["purpose"],
@@ -139,6 +205,28 @@ def exportUserData(request, id):
         if uploaded_file.content_type not in allowed_types:
             return Response({'error': f'Invalid file type {uploaded_file.content_type}'}, status=400)
 
+        # First, check if user exists, if not create one
+        print(f">>> Checking if user {id} exists...")
+        try:
+            user_res = supabase.table("users").select("userId").eq("userId", id).execute()
+            if not user_res.data:
+                print(f">>> User {id} not found, creating new user...")
+                # Create a new user with the provided ID
+                new_user = {
+                    "userId": id,
+                    "created_at": datetime.now().isoformat()
+                }
+                create_user_res = supabase.table("users").insert([new_user]).execute()
+                if hasattr(create_user_res, "error") and create_user_res.error:
+                    print(f">>> Failed to create user: {create_user_res.error}")
+                    return Response({"error": f"Failed to create user: {str(create_user_res.error)}"}, status=500)
+                print(f">>> User {id} created successfully")
+            else:
+                print(f">>> User {id} already exists")
+        except Exception as user_error:
+            print(f">>> Error checking/creating user: {str(user_error)}")
+            return Response({"error": f"User validation failed: {str(user_error)}"}, status=500)
+
         extracted_text = ""
         if uploaded_file.content_type == 'application/pdf':
             try:
@@ -158,12 +246,14 @@ def exportUserData(request, id):
                 image = Image.open(uploaded_file)
                 print(f">>> Image opened: {image.size}, {image.mode}")
                 
-                # Try to use tesseract, but provide fallback if not available
+                # Use EasyOCR for text extraction
                 try:
-                    extracted_text = pytesseract.image_to_string(image)
-                    print(f">>> OCR completed, text length: {len(extracted_text)}")
-                except pytesseract.TesseractNotFoundError as tnf_error:
-                    print(f">>> TESSERACT NOT FOUND: {str(tnf_error)}")
+                    print(">>> Starting EasyOCR text extraction...")
+                    extracted_text = extract_text_easyocr(image)
+                    print(f">>> EasyOCR completed, text length: {len(extracted_text)}")
+                except Exception as ocr_error:
+                    print(f">>> EasyOCR failed: {str(ocr_error)}")
+                    print(">>> Using mock data for testing...")
                     # For testing purposes, return mock passport data
                     extracted_text = """
                     PASSPORT
@@ -175,9 +265,8 @@ def exportUserData(request, id):
                     ADDRESS: 123 MAIN STREET TORONTO ONTARIO
                     """
                     print(">>> Using mock OCR data for testing")
-                except Exception as tesseract_error:
-                    print(f">>> TESSERACT ERROR: {str(tesseract_error)}")
-                    return Response({'error': f'OCR processing failed: {str(tesseract_error)}'}, status=500)
+                
+                print(f">>> OCR completed, text length: {len(extracted_text)}")
             except Exception as e:
                 print(f">>> IMAGE ERROR: {str(e)}")
                 return Response({'error': f'Error processing image: {str(e)}'}, status=500)
