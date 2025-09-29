@@ -1,13 +1,20 @@
+# Django and related packages
 Django==5.0.6
 djangorestframework==3.16.1
+gunicorn==23.0.0
+django-cors-headers==4.9.0
+
+# Image and PDF processing
 Pillow==11.3.0
 PyPDF2==3.0.1
+opencv-python-headless==4.10.0.84
+
+# Environment and API clients
 python-dotenv==1.1.1
 supabase==2.20.0
-gunicorn
-django-cors-headers
-torch==2.5.1
-torchvision==0.20.1
-opencv-python-headless==4.10.0.84
+
+# Machine Learning libraries (updated for Python 3.13 compatibility)
+torch==2.6.0
+torchvision==0.21.0
 numpy==1.26.4
 easyocr==1.7.1
