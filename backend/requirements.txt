@@ -6,8 +6,8 @@ python-dotenv==1.1.1
 supabase==2.20.0
 gunicorn
 django-cors-headers
-opencv-python-headless==4.10.0.84
 torch==2.5.1
-torchvision==0.21.0
+torchvision==0.20.1
+opencv-python-headless==4.10.0.84
 numpy==1.26.4
 easyocr==1.7.1
