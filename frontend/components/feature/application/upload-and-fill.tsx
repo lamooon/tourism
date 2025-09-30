@@ -18,6 +18,25 @@ import { toast } from "sonner";
 
 import { DEMO_EXTRACTION, DEMO_MAPPING } from "@/lib/mocks";
 
+function getDisplayName(key: string): string {
+  const displayNames: Record<string, string> = {
+    fullName: "Full Name",
+    dateOfBirth: "Date of Birth",
+    passportNumber: "Passport Number",
+    nationality: "Nationality",
+    expiry: "Expiry Date",
+    address: "Address",
+    phoneNumber: "Phone Number",
+    email: "Email",
+    purposeOfTrip: "Purpose of Trip",
+    intendedArrivalDate: "Intended Arrival Date",
+    intendedDepartureDate: "Intended Departure Date",
+    bankBalanceHKD: "Bank Balance (HKD)"
+  };
+
+  return displayNames[key] || key;
+}
+
 export function UploadAndFill() {
   const { state, setUploads, setExtraction, setMapping, updateMappingValue } = useApp();
   const inputRef = React.useRef<HTMLInputElement | null>(null);
@@ -29,10 +48,8 @@ export function UploadAndFill() {
         description: 'Extracting data from uploaded file' 
       });
       
-      // Simulate processing delay for realistic demo experience
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Always use hardcoded Hong Kong demo data regardless of uploaded file
       setExtraction(DEMO_EXTRACTION);
       setMapping(DEMO_MAPPING);
       
@@ -98,9 +115,6 @@ export function UploadAndFill() {
     toast.success("Mapping JSON copied");
   }
 
-  function onSimulateFill() {
-    toast.message("Simulating form fill…", { description: "Rows highlighted" });
-  }
 
   return (
     <div className="space-y-6">
@@ -167,10 +181,6 @@ export function UploadAndFill() {
   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
     {/* Identity */}
     <div className="rounded-md border p-3 space-y-1 md:col-span-2">
-      <div>MRZ</div>
-      <div className="font-mono text-xs whitespace-pre-wrap">
-        {state.extraction.mrz}
-      </div>
     </div>
     <div className="rounded-md border p-3 space-y-1">
       <div>Full Name</div>
@@ -231,46 +241,19 @@ export function UploadAndFill() {
 
       <div>
         <div className="font-medium mb-2 flex items-center justify-between">
-          <span>Mapping</span>
-          <div className="space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onCopyMapping}
-              className="gap-2"
-            >
-              <ClipboardCopy className="size-4" /> Copy Mapping JSON
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onSimulateFill}
-              className="gap-2"
-            >
-              Simulate Fill
-            </Button>
-          </div>
+          <span>Edit Information</span>
         </div>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Extracted Field</TableHead>
+              <TableHead>Field Name</TableHead>
               <TableHead>Value</TableHead>
-              <TableHead>Target Field</TableHead>
-              <TableHead>Mapped Value</TableHead>
-              <TableHead>Confidence</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {state.mapping.map((m) => (
               <TableRow key={m.formField} className="transition-colors">
-                <TableCell>{m.extractedKey}</TableCell>
-                <TableCell>
-                  {String(state.extraction[m.extractedKey])}
-                </TableCell>
-                <TableCell className="font-mono text-xs">
-                  {m.formField}
-                </TableCell>
+                <TableCell>{getDisplayName(m.extractedKey)}</TableCell>
                 <TableCell>
                   <Input
                     value={String(
@@ -280,19 +263,6 @@ export function UploadAndFill() {
                       updateMappingValue(m.formField, e.target.value)
                     }
                   />
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    variant={
-                      m.confidence === "high"
-                        ? "default"
-                        : m.confidence === "medium"
-                        ? "secondary"
-                        : "outline"
-                    }
-                  >
-                    {m.confidence}
-                  </Badge>
                 </TableCell>
               </TableRow>
             ))}

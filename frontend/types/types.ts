@@ -36,7 +36,6 @@ export interface ChecklistItem {
 }
 
 export interface ExtractionResult {
-  mrz: string;
   fullName: string;
   dateOfBirth: string;
   passportNumber: string;
@@ -44,6 +43,11 @@ export interface ExtractionResult {
   expiry: string;
   address: string;
   bankBalanceHKD: number;
+  phoneNumber: string;
+  email: string;
+  purposeOfTrip: string;
+  intendedArrivalDate: string;
+  intendedDepartureDate: string;
 }
 
 export type Confidence = "low" | "medium" | "high";

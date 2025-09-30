@@ -132,7 +132,6 @@ export function generateChecklist(
 
 // Empty initial state - fields should be empty before upload
 export const EMPTY_EXTRACTION: ExtractionResult = {
-  mrz: "",
   fullName: "",
   dateOfBirth: "",
   passportNumber: "",
@@ -149,7 +148,6 @@ export const EMPTY_EXTRACTION: ExtractionResult = {
 
 // Mock data for demo - realistic Hong Kong person
 export const DEMO_EXTRACTION: ExtractionResult = {
-  mrz: "P<HKGWONG<<KA<MING<<<<<<<<<<<<<<<<<<<<<<<<\nH9876543<2HKG9205158M3112295<<<<<<<<<<<<<<04",
   fullName: "WONG Ka Ming",
   dateOfBirth: "1992-05-15",
   passportNumber: "H9876543",
