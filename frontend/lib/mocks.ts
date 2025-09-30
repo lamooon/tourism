@@ -139,6 +139,11 @@ export const EMPTY_EXTRACTION: ExtractionResult = {
   nationality: "",
   expiry: "",
   address: "",
+  phoneNumber: "",
+  email: "",
+  purposeOfTrip: "",
+  intendedArrivalDate: "",
+  intendedDepartureDate: "",
   bankBalanceHKD: 0,
 };
 
@@ -151,6 +156,11 @@ export const DEMO_EXTRACTION: ExtractionResult = {
   nationality: "Hong Kong SAR",
   expiry: "2031-12-29",
   address: "Flat B, 25/F, Tower 3, Mei Foo Sun Chuen, Lai Chi Kok, Kowloon, Hong Kong",
+  phoneNumber: "+852 92374207",
+  email: "kmwong@gmail.com",
+  purposeOfTrip: "Tourism",
+  intendedArrivalDate: "2025-12-15",
+  intendedDepartureDate: "2026-01-05",
   bankBalanceHKD: 285000,
 };
 
