@@ -162,46 +162,72 @@ export function UploadAndFill() {
           ))}
         </div>
       )}
-
-      <div>
-        <div className="font-medium mb-2">Extraction Preview</div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-          <div className="rounded-md border p-3 space-y-1">
-            <div>MRZ</div>
-            <div className="font-mono text-xs whitespace-pre-wrap">
-              {state.extraction.mrz}
-            </div>
-          </div>
-          <div className="rounded-md border p-3 space-y-1">
-            <div>Full Name</div>
-            <div>{state.extraction.fullName}</div>
-          </div>
-          <div className="rounded-md border p-3 space-y-1">
-            <div>Date of Birth</div>
-            <div>{state.extraction.dateOfBirth}</div>
-          </div>
-          <div className="rounded-md border p-3 space-y-1">
-            <div>Passport Number</div>
-            <div>{state.extraction.passportNumber}</div>
-          </div>
-          <div className="rounded-md border p-3 space-y-1">
-            <div>Nationality</div>
-            <div>{state.extraction.nationality}</div>
-          </div>
-          <div className="rounded-md border p-3 space-y-1">
-            <div>Expiry</div>
-            <div>{state.extraction.expiry}</div>
-          </div>
-          <div className="rounded-md border p-3 space-y-1 md:col-span-2">
-            <div>Address</div>
-            <div>{state.extraction.address}</div>
-          </div>
-          <div className="rounded-md border p-3 space-y-1 md:col-span-2">
-            <div>Bank Balance (HKD)</div>
-            <div>{state.extraction.bankBalanceHKD.toLocaleString()}</div>
-          </div>
-        </div>
+<div>
+  <div className="font-medium mb-2">Extraction Preview</div>
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+    {/* Identity */}
+    <div className="rounded-md border p-3 space-y-1 md:col-span-2">
+      <div>MRZ</div>
+      <div className="font-mono text-xs whitespace-pre-wrap">
+        {state.extraction.mrz}
       </div>
+    </div>
+    <div className="rounded-md border p-3 space-y-1">
+      <div>Full Name</div>
+      <div>{state.extraction.fullName}</div>
+    </div>
+    <div className="rounded-md border p-3 space-y-1">
+      <div>Date of Birth</div>
+      <div>{state.extraction.dateOfBirth}</div>
+    </div>
+    <div className="rounded-md border p-3 space-y-1">
+      <div>Passport Number</div>
+      <div>{state.extraction.passportNumber}</div>
+    </div>
+    <div className="rounded-md border p-3 space-y-1">
+      <div>Nationality</div>
+      <div>{state.extraction.nationality}</div>
+    </div>
+    <div className="rounded-md border p-3 space-y-1">
+      <div>Expiry</div>
+      <div>{state.extraction.expiry}</div>
+    </div>
+
+    {/* Contact */}
+    <div className="rounded-md border p-3 space-y-1 md:col-span-2">
+      <div>Address</div>
+      <div>{state.extraction.address}</div>
+    </div>
+    <div className="rounded-md border p-3 space-y-1">
+      <div>Phone Number</div>
+      <div>{state.extraction.phoneNumber}</div>
+    </div>
+    <div className="rounded-md border p-3 space-y-1">
+      <div>Email</div>
+      <div>{state.extraction.email}</div>
+    </div>
+
+    {/* Travel */}
+    <div className="rounded-md border p-3 space-y-1">
+      <div>Purpose of Trip</div>
+      <div>{state.extraction.purposeOfTrip}</div>
+    </div>
+    <div className="rounded-md border p-3 space-y-1">
+      <div>Intended Arrival Date</div>
+      <div>{state.extraction.intendedArrivalDate}</div>
+    </div>
+    <div className="rounded-md border p-3 space-y-1">
+      <div>Intended Departure Date</div>
+      <div>{state.extraction.intendedDepartureDate}</div>
+    </div>
+
+    {/* Financial */}
+    <div className="rounded-md border p-3 space-y-1 md:col-span-2">
+      <div>Bank Balance (HKD)</div>
+      <div>{state.extraction.bankBalanceHKD.toLocaleString()}</div>
+    </div>
+  </div>
+</div>
 
       <div>
         <div className="font-medium mb-2 flex items-center justify-between">
