@@ -199,6 +199,36 @@ export const DEMO_MAPPING: MappingItem[] = [
     confidence: "medium",
   },
   {
+    extractedKey: "phoneNumber",
+    formField: "phone_number",
+    value: "+852 92374207",
+    confidence: "medium",
+  },
+  {
+    extractedKey: "email",
+    formField: "email_address",
+    value: "kmwong@gmail.com",
+    confidence: "medium",
+  },
+  {
+    extractedKey: "purposeOfTrip",
+    formField: "purpose_of_trip",
+    value: "Tourism",
+    confidence: "low",
+  },
+  {
+    extractedKey: "intendedArrivalDate",
+    formField: "arrival_date",
+    value: "2025-12-15",
+    confidence: "low",
+  },
+  {
+    extractedKey: "intendedDepartureDate",
+    formField: "departure_date",
+    value: "2026-01-05",
+    confidence: "low",
+  },
+  {
     extractedKey: "bankBalanceHKD",
     formField: "financial_proof_amount",
     value: "285000",
