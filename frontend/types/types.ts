@@ -43,6 +43,7 @@ export interface ExtractionResult {
   nationality: string;
   expiry: string;
   address: string;
+  phoneNumber: string;
   bankBalanceHKD: number;
 }
 

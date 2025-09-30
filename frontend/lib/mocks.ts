@@ -8,7 +8,7 @@ import type {
   DateRange,
 } from "@/types/types";
 
-export const DEFAULT_NATIONALITY = "Hong Kong SAR";
+export const DEFAULT_NATIONALITY = "China";
 
 export function visaLabelFor(
   destination: Destination | null
@@ -240,19 +240,20 @@ export const EMPTY_EXTRACTION: ExtractionResult = {
   nationality: "",
   expiry: "",
   address: "",
+  phoneNumber: "",
   bankBalanceHKD: 0,
 };
 
-// Mock data for demo - realistic Hong Kong person
+// Mock data for demo - realistic China national
 export const DEMO_EXTRACTION: ExtractionResult = {
-  mrz: "P<HKGWONG<<KA<MING<<<<<<<<<<<<<<<<<<<<<<<<\nH9876543<2HKG9205158M3112295<<<<<<<<<<<<<<04",
+  mrz: "P<CHNWANG<<XIAOMING<<<<<<<<<<<<<<<<<<<<<<<\nG12345678<3CHN9001012M3001012<<<<<<<<<<<<<<08",
   fullName: "WONG Ka Ming",
   dateOfBirth: "1992-05-15",
-  passportNumber: "H9876543",
-  nationality: "Hong Kong SAR",
+  passportNumber: "G12345678",
+  nationality: "China",
   expiry: "2031-12-29",
-  address:
-    "Flat B, 25/F, Tower 3, Mei Foo Sun Chuen, Lai Chi Kok, Kowloon, Hong Kong",
+  address: "Room 1203, Tower 2, Jianguo Garden, Chaoyang, Beijing, China",
+  phoneNumber: "+852 9237 4207",
   bankBalanceHKD: 285000,
 };
 
@@ -262,7 +263,7 @@ export const MOCK_EXTRACTION = EMPTY_EXTRACTION;
 // Empty initial mapping
 export const EMPTY_MAPPING: MappingItem[] = [];
 
-// Demo mapping with realistic Hong Kong data
+// Demo mapping with realistic China applicant data
 export const DEMO_MAPPING: MappingItem[] = [
   {
     extractedKey: "fullName",
@@ -282,7 +283,7 @@ export const DEMO_MAPPING: MappingItem[] = [
   {
     extractedKey: "nationality",
     formField: "passport_nationality",
-    value: "Hong Kong SAR",
+    value: "China",
   },
   {
     extractedKey: "expiry",
@@ -292,11 +293,10 @@ export const DEMO_MAPPING: MappingItem[] = [
   {
     extractedKey: "address",
     formField: "residential_address",
-    value:
-      "Flat B, 25/F, Tower 3, Mei Foo Sun Chuen, Lai Chi Kok, Kowloon, Hong Kong",
+    value: "Room 1203, Tower 2, Jianguo Garden, Chaoyang, Beijing, China",
   },
   {
-    extractedKey: "address",
+    extractedKey: "phoneNumber",
     formField: "phone_number",
     value: "+852 92374207",
   },

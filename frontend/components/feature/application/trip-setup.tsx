@@ -57,7 +57,7 @@ export function TripSetup({ form }: { form: UseFormReturn<TripFormValues> }) {
                   placeholder="Select nationality"
                   value={field.value || null}
                   valueKind="alpha3"
-                  allowlist={["HKG"]}
+                  allowlist={["CHN"]}
                   onChange={(alpha3) => {
                     field.onChange(alpha3);
                     updateTrip({ nationalityCode: alpha3 });

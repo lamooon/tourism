@@ -71,7 +71,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   function createApplication(): string {
     const id = crypto.randomUUID();
     const trip: TripSelections = {
-      nationalityCode: "HKG",
+      nationalityCode: "CHN",
       destinationCountryAlpha2: null,
       destination: null,
       purpose: "Tourist",
@@ -153,7 +153,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   function updateTrip(next: Partial<TripSelections>) {
     if (!state.currentAppId) return;
     const current = state.trip ?? {
-      nationalityCode: "HKG",
+      nationalityCode: "CHN",
       destinationCountryAlpha2: null,
       destination: null,
       purpose: "Tourist",
