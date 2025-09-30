@@ -12,11 +12,10 @@ AI-driven agent that automates the entire visa workflow:
 - Auto Document Handling — OCR + NLP to scan documents and auto-fill forms
 - Status Tracking — Live embassy processing updates and deadline reminders
 
-## Demo Flow
+## Workflow
 1. Select destination → AI shows requirements checklist
 2. Enter travel details → AI determines visa type automatically
 3. Upload documents → OCR extracts data, pre-fills forms
 
-## Demo Link
-https://youtu.be/RprbrnktPD4
-
+## Demo Video
+https://github.com/user-attachments/assets/fdabc58c-ae6d-4ce2-b788-adfbddaef7c7
