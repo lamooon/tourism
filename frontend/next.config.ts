@@ -10,11 +10,11 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        source: "/api/:path*",
+        source: "/api/:path((?!countries$).*)",
         destination: `${backendUrl}/api/:path*`,
       },
     ];
-  }
+  },
 };
 
 export default nextConfig;

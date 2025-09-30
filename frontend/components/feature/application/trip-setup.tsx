@@ -57,6 +57,7 @@ export function TripSetup({ form }: { form: UseFormReturn<TripFormValues> }) {
                   placeholder="Select nationality"
                   value={field.value || null}
                   valueKind="alpha3"
+                  allowlist={["HKG"]}
                   onChange={(alpha3) => {
                     field.onChange(alpha3);
                     updateTrip({ nationalityCode: alpha3 });
@@ -76,6 +77,7 @@ export function TripSetup({ form }: { form: UseFormReturn<TripFormValues> }) {
                   placeholder="Select destination country"
                   value={field.value || null}
                   valueKind="alpha2"
+                  allowlist={["GB"]}
                   onChange={(alpha2) => {
                     field.onChange(alpha2);
                     setIsCalculating(true);
@@ -111,7 +113,6 @@ export function TripSetup({ form }: { form: UseFormReturn<TripFormValues> }) {
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="Tourist">Tourist</SelectItem>
-                    <SelectItem value="Business">Business</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -214,7 +215,6 @@ export function TripSetup({ form }: { form: UseFormReturn<TripFormValues> }) {
               ))}
           </div>
         ) : null}
-        <div className="text-sm">Next validates required fields.</div>
       </div>
     </Form>
   );

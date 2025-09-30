@@ -46,13 +46,10 @@ export interface ExtractionResult {
   bankBalanceHKD: number;
 }
 
-export type Confidence = "low" | "medium" | "high";
-
 export interface MappingItem {
   extractedKey: keyof ExtractionResult;
   formField: string;
   value: string | number;
-  confidence: Confidence;
 }
 
 export interface UploadMeta {

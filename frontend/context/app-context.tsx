@@ -74,7 +74,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       nationalityCode: "HKG",
       destinationCountryAlpha2: null,
       destination: null,
-      purpose: null,
+      purpose: "Tourist",
       dates: { from: null, to: null },
       visaTypeLabel: null,
     };
@@ -134,15 +134,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
 
   function clearCurrentApplication() {
-    console.log("Clearing current application, currentAppId:", state.currentAppId);
+    console.log(
+      "Clearing current application, currentAppId:",
+      state.currentAppId
+    );
 
     // Force a complete reset to initial state
     setState(initialState);
 
     // Also clear any localStorage or sessionStorage if you're using it
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       // Clear any stored data that might be persisting
-      localStorage.removeItem('currentApp'); // if you store anything in localStorage
+      localStorage.removeItem("currentApp"); // if you store anything in localStorage
       sessionStorage.clear(); // clear session storage
     }
   }
@@ -153,7 +156,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       nationalityCode: "HKG",
       destinationCountryAlpha2: null,
       destination: null,
-      purpose: null,
+      purpose: "Tourist",
       dates: { from: null, to: null },
       visaTypeLabel: null,
     };
@@ -167,13 +170,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const apps = state.applications.map((a) =>
       a.id === state.currentAppId
         ? {
-          ...a,
-          destination: merged.destination,
-          visaTypeLabel,
-          purpose: merged.purpose,
-          dates: merged.dates,
-          progressPct: calcProgress(checklist, state.checklistState),
-        }
+            ...a,
+            destination: merged.destination,
+            visaTypeLabel,
+            purpose: merged.purpose,
+            dates: merged.dates,
+            progressPct: calcProgress(checklist, state.checklistState),
+          }
         : a
     );
 

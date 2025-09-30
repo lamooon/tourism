@@ -18,6 +18,7 @@ import { ChevronsUpDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Country } from "@/lib/countries";
 import { getCountries } from "@/lib/countries";
+import { Badge } from "@/components/ui/badge";
 
 type CountryComboboxProps = {
   label?: string;
@@ -25,6 +26,8 @@ type CountryComboboxProps = {
   value: string | null; // alpha2 or alpha3 depending on usage
   valueKind?: "alpha2" | "alpha3";
   onChange: (nextCode: string) => void;
+  // If provided, only these codes are selectable; others are disabled with a badge
+  allowlist?: string[];
 };
 
 export function CountryCombobox({
@@ -33,6 +36,7 @@ export function CountryCombobox({
   value,
   valueKind = "alpha3",
   onChange,
+  allowlist,
 }: CountryComboboxProps) {
   const [open, setOpen] = React.useState(false);
   const [countries, setCountries] = React.useState<Country[]>([]);
@@ -59,6 +63,21 @@ export function CountryCombobox({
       ) || null
     );
   }, [countries, value, valueKind]);
+
+  const orderedCountries = React.useMemo(() => {
+    if (!allowlist || allowlist.length === 0) return countries;
+    const allowed: Country[] = [];
+    const disallowed: Country[] = [];
+    for (const c of countries) {
+      const code = valueKind === "alpha3" ? c.alpha3 : c.alpha2;
+      if (allowlist.includes(code)) {
+        allowed.push(c);
+      } else {
+        disallowed.push(c);
+      }
+    }
+    return [...allowed, ...disallowed];
+  }, [countries, allowlist, valueKind]);
 
   return (
     <div className="space-y-2">
@@ -101,14 +120,17 @@ export function CountryCombobox({
             <CommandInput placeholder="Search country…" />
             <CommandEmpty>No country found.</CommandEmpty>
             <CommandGroup className="max-h-60 overflow-auto">
-              {countries.map((c) => {
+              {orderedCountries.map((c) => {
                 const code = valueKind === "alpha3" ? c.alpha3 : c.alpha2;
                 const isSelected = value === code;
+                const isAllowed = !allowlist || allowlist.includes(code);
                 return (
                   <CommandItem
                     key={code}
                     value={`${c.name} ${c.alpha3} ${c.alpha2}`}
+                    disabled={!isAllowed}
                     onSelect={() => {
+                      if (!isAllowed) return;
                       onChange(code);
                       setOpen(false);
                     }}
@@ -123,12 +145,18 @@ export function CountryCombobox({
                     <span className="truncate">
                       {c.name} ({c.alpha3})
                     </span>
-                    <Check
-                      className={cn(
-                        "ml-auto h-4 w-4",
-                        isSelected ? "opacity-100" : "opacity-0"
-                      )}
-                    />
+                    {isAllowed ? (
+                      <Check
+                        className={cn(
+                          "ml-auto h-4 w-4",
+                          isSelected ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                    ) : (
+                      <Badge className="ml-auto" variant="secondary">
+                        Coming soon
+                      </Badge>
+                    )}
                   </CommandItem>
                 );
               })}

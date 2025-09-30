@@ -2,39 +2,23 @@
 
 import * as React from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
 export function LaunchAgent() {
-  const [open, setOpen] = React.useState(false);
-
   return (
     <div className="space-y-4">
-      <div className="rounded-md border p-6 min-h-[420px] flex items-center justify-center text-muted-foreground">
-        Agent Runner — placeholder
-      </div>
-
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Running agent…</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-2 text-sm">
-            <div>Opening form…</div>
-            <div>Filling section A…</div>
-            <div>Reviewing…</div>
-            <div className="font-medium text-green-600">Complete</div>
+      <div className="rounded-md border p-6 min-h-[240px] flex items-center justify-center">
+        <div className="text-center space-y-2">
+          <div className="text-2xl font-semibold">All set!</div>
+          <div className="text-sm text-muted-foreground">
+            Your application has been filled.
           </div>
-          <DialogFooter>
-            <Button onClick={() => setOpen(false)}>Close</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          <Button asChild className="mt-2">
+            <a href="/filled.pdf" download>
+              Download filled PDF
+            </a>
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

@@ -38,7 +38,8 @@ type NextRouter = ReturnType<typeof useRouter>;
 export function Wizard() {
   useUser({ or: "redirect" });
   const user = useUser();
-  const { state, loadApplication, createApplication, clearCurrentApplication } = useApp();
+  const { state, loadApplication, createApplication, clearCurrentApplication } =
+    useApp();
   const sp = useSearchParams();
   const router = useRouter();
   const appId = sp.get("appId");
@@ -56,7 +57,7 @@ export function Wizard() {
     defaultValues: {
       nationalityCode: state.trip?.nationalityCode ?? "",
       destinationCountryAlpha2: state.trip?.destinationCountryAlpha2 ?? "",
-      purpose: (state.trip?.purpose as "Tourist" | "Business") ?? "Tourist",
+      purpose: (state.trip?.purpose as "Tourist") ?? "Tourist",
       from: state.trip?.dates.from ?? "",
       to: state.trip?.dates.to ?? "",
     },
@@ -75,12 +76,21 @@ export function Wizard() {
     const formIsDirty = tripForm.formState.isDirty;
 
     // Check if there's any progress in the application
-    const hasProgress = state.checklist.some(item => state.checklistState[item.id]) ||
+    const hasProgress =
+      state.checklist.some((item) => state.checklistState[item.id]) ||
       state.uploads.length > 0 ||
       step > 1;
 
     return formIsDirty || hasProgress;
-  }, [tripForm.formState.isDirty, state.checklistState, state.uploads.length, step, state.checklist, isNavigating, wizardStarted]);
+  }, [
+    tripForm.formState.isDirty,
+    state.checklistState,
+    state.uploads.length,
+    step,
+    state.checklist,
+    isNavigating,
+    wizardStarted,
+  ]);
 
   // --- initial app load ---
   React.useEffect(() => {
@@ -110,7 +120,7 @@ export function Wizard() {
     tripForm.reset({
       nationalityCode: state.trip.nationalityCode ?? "",
       destinationCountryAlpha2: state.trip.destinationCountryAlpha2 ?? "",
-      purpose: (state.trip.purpose as "Tourist" | "Business") ?? "Tourist",
+      purpose: (state.trip.purpose as "Tourist") ?? "Tourist",
       from: state.trip.dates.from ?? "",
       to: state.trip.dates.to ?? "",
     });
@@ -216,7 +226,7 @@ export function Wizard() {
     { id: 1, title: "Trip Setup" },
     { id: 2, title: "Checklist" },
     { id: 3, title: "Upload & Fill" },
-    { id: 4, title: "Launch Agent" },
+    { id: 4, title: "Done" },
   ];
   const pct = Math.round((step / steps.length) * 100);
   const current = steps[step - 1]?.title ?? "";
@@ -229,16 +239,37 @@ export function Wizard() {
 
       const target = (e.target as HTMLElement)?.closest("a");
       if (target && target instanceof HTMLAnchorElement) {
-        const href = target.getAttribute("href");
-        console.log("Link clicked:", href, "hasUnsavedChanges:", hasUnsavedChanges);
+        const href = target.getAttribute("href") ?? "";
+
+        // Allow safe actions without warning:
+        // - explicit downloads
+        // - opening in a new tab/window
+        // - direct file links (e.g., .pdf in /public)
+        // - blob/data URLs
+        if (
+          target.hasAttribute("download") ||
+          target.target === "_blank" ||
+          /\.(pdf|zip|png|jpg|jpeg|gif|webp)(\?.*)?$/i.test(href) ||
+          href.startsWith("blob:") ||
+          href.startsWith("data:")
+        ) {
+          return;
+        }
+        console.log(
+          "Link clicked:",
+          href,
+          "hasUnsavedChanges:",
+          hasUnsavedChanges
+        );
 
         // Check for any navigation away from the current wizard
-        if (href && (
-          href === "/" ||
-          href.includes("/dashboard") ||
-          href.startsWith("http") ||
-          (href.startsWith("/") && !href.includes("/app"))
-        )) {
+        if (
+          href &&
+          (href === "/" ||
+            href.includes("/dashboard") ||
+            href.startsWith("http") ||
+            (href.startsWith("/") && !href.includes("/app")))
+        ) {
           e.preventDefault();
           e.stopPropagation();
           setNextUrl(href);
@@ -253,7 +284,7 @@ export function Wizard() {
         e.preventDefault();
         setShowLeaveDialog(true);
         // Push the current state back to prevent navigation
-        window.history.pushState(null, '', window.location.href);
+        window.history.pushState(null, "", window.location.href);
       }
     };
 
@@ -277,9 +308,16 @@ export function Wizard() {
     const originalReplace = router.replace;
 
     // Create properly typed versions
-    const interceptedPush = function(href: string, options?: Record<string, unknown>) {
+    const interceptedPush = function (
+      href: string,
+      options?: Record<string, unknown>
+    ) {
       console.log("Router.push intercepted:", href);
-      if (href === "/" || href.includes("/dashboard") || (!href.includes("/app") && href.startsWith("/"))) {
+      if (
+        href === "/" ||
+        href.includes("/dashboard") ||
+        (!href.includes("/app") && href.startsWith("/"))
+      ) {
         setNextUrl(href);
         setShowLeaveDialog(true);
         return Promise.resolve(false);
@@ -287,9 +325,16 @@ export function Wizard() {
       return originalPush.call(router, href, options);
     };
 
-    const interceptedReplace = function(href: string, options?: Record<string, unknown>) {
+    const interceptedReplace = function (
+      href: string,
+      options?: Record<string, unknown>
+    ) {
       console.log("Router.replace intercepted:", href);
-      if (href === "/" || href.includes("/dashboard") || (!href.includes("/app") && href.startsWith("/"))) {
+      if (
+        href === "/" ||
+        href.includes("/dashboard") ||
+        (!href.includes("/app") && href.startsWith("/"))
+      ) {
         setNextUrl(href);
         setShowLeaveDialog(true);
         return Promise.resolve(false);
@@ -298,8 +343,10 @@ export function Wizard() {
     };
 
     // Override the router methods
-    (router as NextRouter & { push: typeof interceptedPush }).push = interceptedPush;
-    (router as NextRouter & { replace: typeof interceptedReplace }).replace = interceptedReplace;
+    (router as NextRouter & { push: typeof interceptedPush }).push =
+      interceptedPush;
+    (router as NextRouter & { replace: typeof interceptedReplace }).replace =
+      interceptedReplace;
 
     return () => {
       (router as NextRouter).push = originalPush;
@@ -349,9 +396,7 @@ export function Wizard() {
         <StickyFooter
           canPrev={step > 1}
           canNext={step < 4}
-          onPrev={() =>
-            setStep((s) => (s > 1 ? ((s - 1) as 1 | 2 | 3) : s))
-          }
+          onPrev={() => setStep((s) => (s > 1 ? ((s - 1) as 1 | 2 | 3) : s))}
           onNext={handleNext}
           onLaunch={() => setStep(4)}
           disabledReason={requirements[0]}
@@ -370,7 +415,9 @@ export function Wizard() {
               Leave Application?
             </AlertDialogTitle>
             <AlertDialogDescription className="text-base">
-              You have unsaved changes in your visa application. If you leave now, all your progress including form data, uploaded documents, and checklist items will be lost and cannot be recovered.
+              You have unsaved changes in your visa application. If you leave
+              now, all your progress including form data, uploaded documents,
+              and checklist items will be lost and cannot be recovered.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

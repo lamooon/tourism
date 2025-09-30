@@ -13,36 +13,36 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ClipboardCopy, Upload } from "lucide-react";
+import { Upload } from "lucide-react";
 import { toast } from "sonner";
 
 import { DEMO_EXTRACTION, DEMO_MAPPING } from "@/lib/mocks";
 
 export function UploadAndFill() {
-  const { state, setUploads, setExtraction, setMapping, updateMappingValue } = useApp();
+  const { state, setUploads, setExtraction, setMapping, updateMappingValue } =
+    useApp();
   const inputRef = React.useRef<HTMLInputElement | null>(null);
 
   async function processUploadedFile(file: File) {
     try {
       // Show processing state
-      toast.message('Processing document...', { 
-        description: 'Extracting data from uploaded file' 
+      toast.message("Processing document...", {
+        description: "Extracting data from uploaded file",
       });
-      
+
       // Simulate processing delay for realistic demo experience
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       // Always use hardcoded Hong Kong demo data regardless of uploaded file
       setExtraction(DEMO_EXTRACTION);
       setMapping(DEMO_MAPPING);
-      
-      toast.success('Document processed successfully!', {
-        description: 'Personal information extracted and mapped to form fields'
+
+      toast.success("Document processed successfully!", {
+        description: "Personal information extracted and mapped to form fields",
       });
-      
     } catch (error) {
-      console.error('Upload error:', error);
-      toast.error('Failed to process document');
+      console.error("Upload error:", error);
+      toast.error("Failed to process document");
     }
   }
 
@@ -51,7 +51,7 @@ export function UploadAndFill() {
     const accepted = ["application/pdf", "image/jpeg", "image/png"];
     const next: typeof state.uploads = [];
     const filesToProcess: File[] = [];
-    
+
     for (const f of Array.from(files)) {
       const tooBig = f.size > 10 * 1024 * 1024;
       const wrongType = !accepted.includes(f.type);
@@ -72,34 +72,15 @@ export function UploadAndFill() {
       });
       filesToProcess.push(f);
     }
-    
+
     if (next.length) {
       setUploads([...(state.uploads ?? []), ...next]);
-      
+
       // Process the first uploaded file for OCR
       if (filesToProcess.length > 0) {
         processUploadedFile(filesToProcess[0]);
       }
     }
-  }
-
-  function onCopyMapping() {
-    const merged = state.mapping.map((m) => ({
-      ...m,
-      value: state.mappingOverrides[m.formField] ?? m.value,
-    }));
-    navigator.clipboard.writeText(
-      JSON.stringify(
-        { visaType: state.trip?.visaTypeLabel, mappings: merged },
-        null,
-        2
-      )
-    );
-    toast.success("Mapping JSON copied");
-  }
-
-  function onSimulateFill() {
-    toast.message("Simulating form fill…", { description: "Rows highlighted" });
   }
 
   return (
@@ -206,24 +187,6 @@ export function UploadAndFill() {
       <div>
         <div className="font-medium mb-2 flex items-center justify-between">
           <span>Mapping</span>
-          <div className="space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onCopyMapping}
-              className="gap-2"
-            >
-              <ClipboardCopy className="size-4" /> Copy Mapping JSON
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onSimulateFill}
-              className="gap-2"
-            >
-              Simulate Fill
-            </Button>
-          </div>
         </div>
         <Table>
           <TableHeader>
@@ -232,7 +195,6 @@ export function UploadAndFill() {
               <TableHead>Value</TableHead>
               <TableHead>Target Field</TableHead>
               <TableHead>Mapped Value</TableHead>
-              <TableHead>Confidence</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -254,19 +216,6 @@ export function UploadAndFill() {
                       updateMappingValue(m.formField, e.target.value)
                     }
                   />
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    variant={
-                      m.confidence === "high"
-                        ? "default"
-                        : m.confidence === "medium"
-                        ? "secondary"
-                        : "outline"
-                    }
-                  >
-                    {m.confidence}
-                  </Badge>
                 </TableCell>
               </TableRow>
             ))}
