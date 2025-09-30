@@ -130,34 +130,81 @@ export function generateChecklist(
   });
 }
 
-export const MOCK_EXTRACTION: ExtractionResult = {
-  mrz: "P<HKGLEE<<JIAHUI<<<<<<<<<<<<<<<<<<<<<<<<<<<\nH1234567<8HKG8501012F3001012<<<<<<<<<<<<<<06",
-  fullName: "LEE JIA HUI",
-  dateOfBirth: "1985-01-01",
-  passportNumber: "H1234567",
-  nationality: "HKG",
-  expiry: "2030-01-01",
-  address: "12F, Example Tower, Central, Hong Kong",
-  bankBalanceHKD: 180000,
+// Empty initial state - fields should be empty before upload
+export const EMPTY_EXTRACTION: ExtractionResult = {
+  mrz: "",
+  fullName: "",
+  dateOfBirth: "",
+  passportNumber: "",
+  nationality: "",
+  expiry: "",
+  address: "",
+  bankBalanceHKD: 0,
 };
 
-export const MOCK_MAPPING: MappingItem[] = [
+// Mock data for demo - realistic Hong Kong person
+export const DEMO_EXTRACTION: ExtractionResult = {
+  mrz: "P<HKGWONG<<KA<MING<<<<<<<<<<<<<<<<<<<<<<<<\nH9876543<2HKG9205158M3112295<<<<<<<<<<<<<<04",
+  fullName: "WONG Ka Ming",
+  dateOfBirth: "1992-05-15",
+  passportNumber: "H9876543",
+  nationality: "Hong Kong SAR",
+  expiry: "2031-12-29",
+  address: "Flat B, 25/F, Tower 3, Mei Foo Sun Chuen, Lai Chi Kok, Kowloon, Hong Kong",
+  bankBalanceHKD: 285000,
+};
+
+// For backwards compatibility
+export const MOCK_EXTRACTION = EMPTY_EXTRACTION;
+
+// Empty initial mapping
+export const EMPTY_MAPPING: MappingItem[] = [];
+
+// Demo mapping with realistic Hong Kong data
+export const DEMO_MAPPING: MappingItem[] = [
   {
     extractedKey: "fullName",
     formField: "applicant_name",
-    value: "LEE JIA HUI",
+    value: "WONG Ka Ming",
     confidence: "high",
   },
   {
     extractedKey: "dateOfBirth",
-    formField: "dob",
-    value: "1985-01-01",
+    formField: "date_of_birth",
+    value: "1992-05-15",
     confidence: "high",
   },
   {
     extractedKey: "passportNumber",
-    formField: "passport_no",
-    value: "H1234567",
+    formField: "passport_number",
+    value: "H9876543",
+    confidence: "high",
+  },
+  {
+    extractedKey: "nationality",
+    formField: "passport_nationality",
+    value: "Hong Kong SAR",
+    confidence: "high",
+  },
+  {
+    extractedKey: "expiry",
+    formField: "passport_expiry",
+    value: "2031-12-29",
+    confidence: "high",
+  },
+  {
+    extractedKey: "address",
+    formField: "residential_address",
+    value: "Flat B, 25/F, Tower 3, Mei Foo Sun Chuen, Lai Chi Kok, Kowloon, Hong Kong",
+    confidence: "medium",
+  },
+  {
+    extractedKey: "bankBalanceHKD",
+    formField: "financial_proof_amount",
+    value: "285000",
     confidence: "medium",
   },
 ];
+
+// For backwards compatibility
+export const MOCK_MAPPING = EMPTY_MAPPING;

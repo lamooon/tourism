@@ -11,8 +11,8 @@ import type {
 } from "@/types/types";
 export type ChecklistState = Record<string, boolean>;
 import {
-  MOCK_EXTRACTION,
-  MOCK_MAPPING,
+  EMPTY_EXTRACTION,
+  EMPTY_MAPPING,
   generateChecklist,
   visaLabelFor,
 } from "@/lib/mocks";
@@ -40,6 +40,7 @@ const AppContext = React.createContext<{
   toggleChecklistItem: (id: string) => void;
   setUploads: (uploads: UploadMeta[]) => void;
   setExtraction: (extraction: ExtractionResult) => void;
+  setMapping: (mapping: MappingItem[]) => void;
   updateMappingValue: (formField: string, value: string | number) => void;
 } | null>(null);
 
@@ -59,8 +60,8 @@ const initialState: AppState = {
   checklist: [],
   checklistState: {},
   uploads: [],
-  extraction: MOCK_EXTRACTION,
-  mapping: MOCK_MAPPING,
+  extraction: EMPTY_EXTRACTION,
+  mapping: EMPTY_MAPPING,
   mappingOverrides: {},
 };
 
@@ -203,6 +204,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setState((s) => ({ ...s, extraction }));
   }
 
+  function setMapping(mapping: MappingItem[]) {
+    if (!state.currentAppId) return;
+    setState((s) => ({ ...s, mapping }));
+  }
+
   function updateMappingValue(formField: string, value: string | number) {
     if (!state.currentAppId) return;
     const next = { ...state.mappingOverrides, [formField]: value };
@@ -221,6 +227,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       toggleChecklistItem,
       setUploads,
       setExtraction,
+      setMapping,
       updateMappingValue,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps

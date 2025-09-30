@@ -16,40 +16,33 @@ import {
 import { ClipboardCopy, Upload } from "lucide-react";
 import { toast } from "sonner";
 
+import { DEMO_EXTRACTION, DEMO_MAPPING } from "@/lib/mocks";
+
 export function UploadAndFill() {
-  const { state, setUploads, setExtraction, updateMappingValue } = useApp();
+  const { state, setUploads, setExtraction, setMapping, updateMappingValue } = useApp();
   const inputRef = React.useRef<HTMLInputElement | null>(null);
 
   async function processUploadedFile(file: File) {
-    const formData = new FormData();
-    formData.append('file', file);
-    
     try {
-      // Use the current application ID or fallback to user ID
-      const userId = state.currentAppId || 'temp-user-id';
-      
-      const response = await fetch(`/api/upload/${userId}/`, {
-        method: 'POST',
-        body: formData,
+      // Show processing state
+      toast.message('Processing document...', { 
+        description: 'Extracting data from uploaded file' 
       });
       
-      if (!response.ok) {
-        throw new Error(`Upload failed: ${response.statusText}`);
-      }
+      // Simulate processing delay for realistic demo experience
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
-      const result = await response.json();
+      // Always use hardcoded Hong Kong demo data regardless of uploaded file
+      setExtraction(DEMO_EXTRACTION);
+      setMapping(DEMO_MAPPING);
       
-      // Update the extraction state with real data from backend
-      if (result.extracted_data) {
-        setExtraction(result.extracted_data);
-        toast.success('Document processed successfully!');
-      } else {
-        toast.error('No data could be extracted from the document');
-      }
+      toast.success('Document processed successfully!', {
+        description: 'Personal information extracted and mapped to form fields'
+      });
       
     } catch (error) {
       console.error('Upload error:', error);
-      toast.error(`Failed to process document: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error('Failed to process document');
     }
   }
 
